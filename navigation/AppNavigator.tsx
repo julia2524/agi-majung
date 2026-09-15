@@ -7,6 +7,7 @@ import SettingScreen from "../screens/SettingsScreen";
 import { RootStackParamList } from "./types";
 import BabyOrderScreen from "../screens/BabyOrderScreen";
 import DueDateScreen from "../screens/DueDateScreen";
+import ChecklistScreen from "../screens/ChecklistScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -29,13 +30,7 @@ export default function AppNavigator() {
           animation: "fade",
         }}
       />
-      <Stack.Screen
-        name="ItemDetailScreen"
-        component={ItemDetailScreen}
-        options={{
-          animation: "fade",
-        }}
-      />
+
       <Stack.Screen
         name="MyItemScreen"
         component={MyItemScreen}
@@ -48,6 +43,23 @@ export default function AppNavigator() {
         name="SettingScreen"
         component={SettingScreen}
         options={{
+          animation: "fade",
+        }}
+      />
+
+      <Stack.Screen
+        name="ItemDetailScreen"
+        component={ItemDetailScreen}
+        options={{
+          title: "준비물 상세",
+          animation: "fade",
+        }}
+      />
+      <Stack.Screen
+        name="ChecklistScreen"
+        component={ChecklistScreen}
+        options={{
+          title: "준비물",
           animation: "fade",
         }}
       />

@@ -57,8 +57,17 @@ export default function HomeScreen({ navigation, route }: Props) {
     return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
   };
 
+  // const handleCategoryPress = (categoryId: string, categoryName: string) => {
+  //   console.log(categoryId, categoryName);
+  // };
+
   const handleCategoryPress = (categoryId: string, categoryName: string) => {
-    console.log(categoryId, categoryName);
+    navigation.navigate("ChecklistScreen", {
+      categoryId,
+      categoryName,
+      dueDate,
+      babyOrder,
+    });
   };
 
   return (
@@ -79,7 +88,7 @@ export default function HomeScreen({ navigation, route }: Props) {
           </DDayContent>
 
           <DDayMascot>
-            <Mascot size={80} />
+            <Mascot size={140} />
           </DDayMascot>
         </DDayCard>
 
@@ -158,7 +167,7 @@ const ScrollContent = styled.ScrollView`
 
 const Header = styled.View`
   margin-top: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 7px; /* 16 → 10: 다음 D-Day 카드와의 체감 간격 축소 */
 `;
 
 const HeaderText = styled.Text`
@@ -168,7 +177,6 @@ const HeaderText = styled.Text`
 `;
 
 const HeaderSubText = styled.Text`
-  margin-top: 4px;
   font-size: ${({ theme }) => theme.typography.body}px;
   font-family: ${({ theme }) => theme.fontFamily.medium};
   color: ${({ theme }) => theme.colors.textSecondary};
@@ -178,7 +186,7 @@ const DDayCard = styled.View`
   width: 100%;
   border-radius: 24px;
   background-color: ${({ theme }) => theme.colors.primary};
-  padding: 20px 24px;
+  padding: 18px 20px; /* 20/24 → 18/20: 카드 내부 여백 축소 */
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
@@ -202,8 +210,8 @@ const DDayLabel = styled.Text`
 `;
 
 const DDayText = styled.Text`
-  margin-vertical: 2px;
-  font-size: 34px;
+  margin-vertical: -20px; /* 2px → 0: 라벨·날짜와 더 밀착 */
+  font-size: ${({ theme }) => theme.typography.hero}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ theme }) => theme.colors.card};
 `;
@@ -222,8 +230,8 @@ const DDayMascot = styled.View`
 
 const ProgressCard = styled.View`
   width: 100%;
-  margin-top: 16px;
-  padding: 18px 20px;
+  margin-top: 14px; /* 16 → 14 */
+  padding: 16px 18px; /* 18/20 → 16/18 */
   border-radius: 20px;
   background-color: ${({ theme }) => theme.colors.card};
   border-width: 1px;
@@ -251,7 +259,7 @@ const ProgressPercent = styled.Text`
 const ProgressBar = styled.View`
   width: 100%;
   height: 10px;
-  margin-top: 12px;
+  margin-top: 10px; /* 12 → 10 */
   border-radius: 5px;
   background-color: ${({ theme }) => theme.colors.border};
   overflow: hidden;
@@ -265,15 +273,15 @@ const ProgressFill = styled.View<{ progress: number }>`
 `;
 
 const ProgressDescription = styled.Text`
-  margin-top: 10px;
+  margin-top: 8px; /* 10 → 8 */
   font-size: ${({ theme }) => theme.typography.small}px;
   font-family: ${({ theme }) => theme.fontFamily.regular};
   color: ${({ theme }) => theme.colors.textSecondary};
 `;
 
 const SectionHeader = styled.View`
-  margin-top: 28px;
-  margin-bottom: 16px;
+  margin-top: 20px; /* 28 → 20 */
+  margin-bottom: 10px; /* 16 → 10 */
 `;
 
 const SectionTitle = styled.Text`
@@ -283,7 +291,7 @@ const SectionTitle = styled.Text`
 `;
 
 const SectionSubTitle = styled.Text`
-  margin-top: 4px;
+  margin-top: -20px;
   font-size: ${({ theme }) => theme.typography.small}px;
   font-family: ${({ theme }) => theme.fontFamily.regular};
   color: ${({ theme }) => theme.colors.textSecondary};
@@ -294,7 +302,7 @@ const CategoryGrid = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: space-between;
-  row-gap: 16px;
+  row-gap: 14px; /* 16 → 14 */
 `;
 
 const CategoryCard = styled.TouchableOpacity`
@@ -325,8 +333,8 @@ const CategoryName = styled.Text`
 
 const MyListCard = styled.TouchableOpacity`
   width: 100%;
-  margin-top: 20px;
-  padding: 16px 20px;
+  margin-top: 14px; /* 20 → 14 */
+  padding: 14px 18px; /* 16/20 → 14/18 */
   border-radius: 20px;
   background-color: ${({ theme }) => theme.colors.secondary};
   flex-direction: row;
@@ -334,17 +342,17 @@ const MyListCard = styled.TouchableOpacity`
 `;
 
 const MyListIconContainer = styled.View`
-  width: 44px;
-  height: 44px;
-  border-radius: 22px;
+  width: 40px; /* 44 → 40 */
+  height: 40px; /* 44 → 40 */
+  border-radius: 20px;
   background-color: ${({ theme }) => theme.colors.card};
   align-items: center;
   justify-content: center;
-  margin-right: 14px;
+  margin-right: 12px; /* 14 → 12 */
 `;
 
 const MyListIconText = styled.Text`
-  font-size: 22px;
+  font-size: 20px; /* 22 → 20, 아이콘 축소에 맞춤 */
 `;
 
 const MyListContent = styled.View`
@@ -358,7 +366,7 @@ const MyListTitle = styled.Text`
 `;
 
 const MyListDescription = styled.Text`
-  margin-top: 2px;
+  margin-top: -20px;
   font-size: ${({ theme }) => theme.typography.small}px;
   font-family: ${({ theme }) => theme.fontFamily.regular};
   color: ${({ theme }) => theme.colors.textSecondary};
@@ -370,5 +378,5 @@ const MyListArrow = styled.Text`
 `;
 
 const BottomSpace = styled.View`
-  height: 40px;
+  height: 60px; /* 40 → 32 */
 `;

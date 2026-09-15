@@ -11,9 +11,11 @@ export type RootStackParamList = {
     dueDate: string;
     babyOrder: "first" | "secondOrMore";
   };
-  ItemDetailScreen: { itemId: string } | { item: BabyItem }; // 상세 화면으로 데이터 전달용
+  ItemDetailScreen: {
+    itemId: string;
+  };
 
-  Checklist: {
+  ChecklistScreen: {
     categoryId: string;
     categoryName: string;
     dueDate: string;
