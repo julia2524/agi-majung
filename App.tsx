@@ -5,6 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import { ThemeProvider } from "styled-components/native";
 import { theme } from "./types/design-system/theme/theme";
 import { useFonts } from "expo-font";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -20,11 +21,13 @@ export default function App() {
     return null;
   }
   return (
-    <ThemeProvider theme={theme}>
-      <NavigationContainer>
-        <StatusBar hidden={false} translucent={true} />
-        <AppNavigator />
-      </NavigationContainer>
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider theme={theme}>
+        <NavigationContainer>
+          <StatusBar hidden={false} translucent={true} />
+          <AppNavigator />
+        </NavigationContainer>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }

@@ -31,3 +31,37 @@ export function getTimingText(
       return "";
   }
 }
+
+export function getCategoryIcon(category: string) {
+  switch (category) {
+    case "출산/병원":
+      return "hospital-box-outline";
+
+    case "수면":
+      return "bed-outline";
+
+    case "목욕":
+      return "bathtub-outline";
+
+    case "수유":
+      return "baby-bottle-outline";
+
+    case "의류":
+      return "tshirt-crew-outline";
+
+    case "위생/세탁":
+      return "washing-machine";
+
+    case "외출":
+      return "bag-personal-outline";
+
+    case "산모":
+      return "human-pregnant";
+
+    case "생활":
+      return "home-outline";
+
+    default:
+      return "baby-face-outline";
+  }
+}

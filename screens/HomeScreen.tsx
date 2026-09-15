@@ -1,5 +1,5 @@
-import React, { useMemo } from "react";
-import styled from "styled-components/native";
+import React, { useCallback, useMemo, useState } from "react";
+import styled, { useTheme } from "styled-components/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import Mascot from "../types/design-system/ui/Mascot";
@@ -17,24 +17,50 @@ import {
   MomIcon,
   HomeIcon,
 } from "../components/icons/CategoryIcons";
+import { useFocusEffect } from "@react-navigation/native";
+import { getCheckedItems } from "../utils/storage";
+import { babyItems } from "../data/babyItems";
+import { Ionicons } from "@expo/vector-icons";
 
 type Props = NativeStackScreenProps<RootStackParamList, "HomeScreen">;
 
 // 카테고리 데이터에 Component 직접 매핑
 const categories = [
-  { id: "hospital", name: "출산·병원", Icon: HospitalIcon },
+  { id: "hospital", name: "출산/병원", Icon: HospitalIcon },
   { id: "sleep", name: "수면", Icon: SleepIcon },
   { id: "bath", name: "목욕", Icon: BathIcon },
   { id: "feeding", name: "수유", Icon: MilkIcon },
   { id: "clothing", name: "의류", Icon: ClothesIcon },
-  { id: "hygiene", name: "위생·세탁", Icon: LaundryIcon },
+  { id: "hygiene", name: "위생/세탁", Icon: LaundryIcon },
   { id: "outdoor", name: "외출", Icon: BagIcon },
   { id: "mother", name: "산모", Icon: MomIcon },
   { id: "life", name: "생활", Icon: HomeIcon },
 ];
 
 export default function HomeScreen({ navigation, route }: Props) {
+  // theme 객체를 직접 가져옵니다.
+  const theme = useTheme();
   const { dueDate, babyOrder } = route.params;
+  const [checkedCount, setCheckedCount] = useState(0);
+  const totalCount = babyItems.length;
+
+  const progress = totalCount === 0 ? 0 : (checkedCount / totalCount) * 100;
+
+  const progressPercent = Math.round(progress);
+
+  useFocusEffect(
+    useCallback(() => {
+      const loadProgress = async () => {
+        const savedItems = await getCheckedItems();
+
+        const allCheckedItemIds = Object.values(savedItems).flat();
+
+        setCheckedCount(allCheckedItemIds.length);
+      };
+
+      loadProgress();
+    }, []),
+  );
 
   const dDay = useMemo(() => {
     const today = new Date();
@@ -96,15 +122,17 @@ export default function HomeScreen({ navigation, route }: Props) {
         <ProgressCard>
           <ProgressHeader>
             <ProgressTitle>준비 진행률</ProgressTitle>
-            <ProgressPercent>0%</ProgressPercent>
+            <ProgressPercent>{progressPercent}%</ProgressPercent>
           </ProgressHeader>
 
           <ProgressBar>
-            <ProgressFill progress={0} />
+            <ProgressFill progress={progress} />
           </ProgressBar>
 
           <ProgressDescription>
-            아직 준비한 물건이 없어요. 하나씩 체크해볼까요?
+            {checkedCount === 0
+              ? "아직 준비한 물건이 없어요. 하나씩 체크해볼까요?"
+              : `${checkedCount}개 준비했어요! 하나씩 차근차근 준비해봐요 💛`}
           </ProgressDescription>
         </ProgressCard>
 
@@ -129,20 +157,34 @@ export default function HomeScreen({ navigation, route }: Props) {
           ))}
         </CategoryGrid>
 
-        {/* 내 준비물 카드 */}
-        <MyListCard activeOpacity={0.8} onPress={() => {}}>
-          <MyListIconContainer>
-            <MyListIconText>📝</MyListIconText>
-          </MyListIconContainer>
+        <MyListCard
+          activeOpacity={0.7}
+          onPress={() => {
+            navigation.navigate("MyItemScreen");
+          }}
+        >
+          <MyListIconBadge>
+            <Ionicons
+              name="add-circle-outline"
+              size={24}
+              color={theme.colors.primary}
+            />
+          </MyListIconBadge>
 
           <MyListContent>
-            <MyListTitle>나만의 준비물 추가하기</MyListTitle>
+            <MyListTitle numberOfLines={1}>나만의 준비물 추가하기</MyListTitle>
             <MyListDescription>
               리스트에 없는 필요한 물건을 직접 추가해요.
             </MyListDescription>
           </MyListContent>
 
-          <MyListArrow>›</MyListArrow>
+          <MyListArrowContainer>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={theme.colors.textSecondary}
+            />
+          </MyListArrowContainer>
         </MyListCard>
 
         <BottomSpace />
@@ -334,25 +376,25 @@ const CategoryName = styled.Text`
 const MyListCard = styled.TouchableOpacity`
   width: 100%;
   margin-top: 14px; /* 20 → 14 */
-  padding: 14px 18px; /* 16/20 → 14/18 */
+  padding: 18px 10px; /* 16/20 → 14/18 */
   border-radius: 20px;
   background-color: ${({ theme }) => theme.colors.secondary};
   flex-direction: row;
   align-items: center;
 `;
 
-const MyListIconContainer = styled.View`
-  width: 40px; /* 44 → 40 */
-  height: 40px; /* 44 → 40 */
-  border-radius: 20px;
-  background-color: ${({ theme }) => theme.colors.card};
-  align-items: center;
-  justify-content: center;
-  margin-right: 12px; /* 14 → 12 */
+const BottomSpace = styled.View`
+  height: 60px; /* 40 → 32 */
 `;
 
-const MyListIconText = styled.Text`
-  font-size: 20px; /* 22 → 20, 아이콘 축소에 맞춤 */
+const MyListIconBadge = styled.View`
+  width: 42px;
+  height: 42px;
+  border-radius: 14px; /* 완만한 라운드 스퀘어로 세련된 느낌 */
+  background-color: ${({ theme }) => theme.colors.secondary};
+  align-items: center;
+  justify-content: center;
+  margin-right: 5px;
 `;
 
 const MyListContent = styled.View`
@@ -363,20 +405,21 @@ const MyListTitle = styled.Text`
   font-size: ${({ theme }) => theme.typography.button}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ theme }) => theme.colors.text};
+  line-height: 20px;
 `;
 
 const MyListDescription = styled.Text`
-  margin-top: -20px;
+  margin-top: 5px;
   font-size: ${({ theme }) => theme.typography.small}px;
-  font-family: ${({ theme }) => theme.fontFamily.regular};
+  font-family: ${({ theme }) => theme.fontFamily.medium};
   color: ${({ theme }) => theme.colors.textSecondary};
+  line-height: 16px;
 `;
 
-const MyListArrow = styled.Text`
-  font-size: 24px;
-  color: ${({ theme }) => theme.colors.textSecondary};
-`;
-
-const BottomSpace = styled.View`
-  height: 60px; /* 40 → 32 */
+const MyListArrowContainer = styled.View`
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  align-items: center;
+  justify-content: center;
 `;

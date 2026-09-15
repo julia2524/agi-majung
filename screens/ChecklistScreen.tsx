@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styled, { useTheme } from "styled-components/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
@@ -7,6 +7,8 @@ import { babyItems } from "../data/babyItems";
 import BabyHeader from "../components/BabyHeader";
 import { Ionicons } from "@expo/vector-icons";
 import { getPriorityText } from "../utils/utils";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { getCheckedItems, saveCheckedItems } from "../utils/storage";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ChecklistScreen">;
 
@@ -17,16 +19,33 @@ export default function ChecklistScreen({ navigation, route }: Props) {
 
   const [checkedItems, setCheckedItems] = useState<string[]>([]);
 
+  useEffect(() => {
+    const loadCheckedItems = async () => {
+      const savedItems = await getCheckedItems();
+
+      const categoryCheckedItems = savedItems[categoryName] ?? [];
+
+      setCheckedItems(categoryCheckedItems);
+    };
+
+    loadCheckedItems();
+  }, [categoryName]);
   const categoryItems = useMemo(() => {
     return babyItems.filter((item) => item.category === categoryName);
   }, [categoryName]);
 
-  const handleToggle = (itemId: string) => {
-    setCheckedItems((prev) => {
-      if (prev.includes(itemId)) {
-        return prev.filter((id) => id !== itemId);
-      }
-      return [...prev, itemId];
+  const handleToggle = async (itemId: string) => {
+    const next = checkedItems.includes(itemId)
+      ? checkedItems.filter((id) => id !== itemId)
+      : [...checkedItems, itemId];
+
+    setCheckedItems(next);
+
+    const savedItems = await getCheckedItems();
+
+    await saveCheckedItems({
+      ...savedItems,
+      [categoryName]: next,
     });
   };
 
@@ -35,6 +54,7 @@ export default function ChecklistScreen({ navigation, route }: Props) {
   };
 
   const checkedCount = checkedItems.length;
+
   const totalCount = categoryItems.length;
   const progress = totalCount === 0 ? 0 : (checkedCount / totalCount) * 100;
 
@@ -137,7 +157,7 @@ export default function ChecklistScreen({ navigation, route }: Props) {
    Styled Components
 ----------------------------- */
 
-const Container = styled.SafeAreaView`
+const Container = styled(SafeAreaView)`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
 `;

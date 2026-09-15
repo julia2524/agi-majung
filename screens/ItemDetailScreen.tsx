@@ -1,12 +1,17 @@
 import styled from "styled-components/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTheme } from "styled-components/native";
 
 import BabyHeader from "../components/BabyHeader"; // 지난번에 만든 공통 헤더
 import { RootStackParamList } from "../navigation/types";
 import { babyItems } from "../data/babyItems";
-import { getPriorityText, getTimingText } from "../utils/utils";
+import {
+  getCategoryIcon,
+  getPriorityText,
+  getTimingText,
+} from "../utils/utils";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ItemDetailScreen">;
 
@@ -33,7 +38,13 @@ export default function ItemDetailScreen({ route }: Props) {
 
       <ScrollContent showsVerticalScrollIndicator={false}>
         <ItemHeader>
-          <ItemIcon>🍼</ItemIcon>
+          <ItemIcon>
+            <MaterialCommunityIcons
+              name={getCategoryIcon(item.category)}
+              size={48}
+              color={theme.colors.primary}
+            />
+          </ItemIcon>
           <ItemName>{item.title}</ItemName>
         </ItemHeader>
 
@@ -135,7 +146,7 @@ export default function ItemDetailScreen({ route }: Props) {
   );
 }
 
-const Container = styled.SafeAreaView`
+const Container = styled(SafeAreaView)`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
 `;
@@ -147,12 +158,10 @@ const ScrollContent = styled.ScrollView`
 
 const ItemHeader = styled.View`
   align-items: center;
-  margin-top: 12px;
 `;
 
-const ItemIcon = styled.Text`
-  font-size: 48px;
-  margin-bottom: 8px;
+const ItemIcon = styled.View`
+  margin-bottom: -10px;
 `;
 
 const ItemName = styled.Text`
@@ -165,7 +174,7 @@ const TagRow = styled.View`
   flex-direction: row;
   justify-content: center;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: -10px;
 `;
 
 const ImportanceTag = styled.View`
@@ -202,7 +211,6 @@ const SectionTitle = styled.View`
   flex-direction: row;
   align-items: center;
   gap: 6px;
-  margin-bottom: 10px;
 `;
 
 const SectionTitleText = styled.Text`
