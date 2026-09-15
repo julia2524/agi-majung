@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "아기마중",
-    "slug": "Ung-ae_Check",
+    "slug": "agi_Ma-jung",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -26,9 +26,6 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-font",
-      "@react-native-community/datetimepicker"
-    ]
+    "plugins": ["expo-font", "@react-native-community/datetimepicker"]
   }
 }
