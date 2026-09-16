@@ -62,22 +62,26 @@ export default function ItemDetailScreen({ route }: Props) {
         {/* 4. 준비 시기 */}
         <Section>
           <SectionTitle>
+            <Ionicons
+              name="calendar-outline"
+              size={20}
+              color={theme.colors.primary}
+            />
             <SectionTitleText>언제 준비할까요?</SectionTitleText>
           </SectionTitle>
 
           <InfoCard>
-            <Ionicons
-              name="calendar-outline"
-              size={22}
-              color={theme.colors.primary}
-            />
-
             <InfoText>{getTimingText(item.timing)}</InfoText>
           </InfoCard>
         </Section>
 
         <Section>
           <SectionTitle>
+            <Ionicons
+              name="checkmark-circle-outline"
+              size={20}
+              color={theme.colors.primary}
+            />
             <SectionTitleText>실전 판단</SectionTitleText>
           </SectionTitle>
 
@@ -100,7 +104,14 @@ export default function ItemDetailScreen({ route }: Props) {
 
         {item.noticeTag && (
           <Section>
-            <SectionTitle>알아두세요</SectionTitle>
+            <SectionTitle>
+              <Ionicons
+                name="information-circle-outline"
+                size={20}
+                color={theme.colors.primary}
+              />
+              <SectionTitleText>알아두세요</SectionTitleText>
+            </SectionTitle>
             <NoticeCard>
               <NoticeText>{item.noticeTag}</NoticeText>
             </NoticeCard>

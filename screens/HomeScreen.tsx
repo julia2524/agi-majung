@@ -21,6 +21,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { getCheckedItems } from "../utils/storage";
 import { babyItems } from "../data/babyItems";
 import { Ionicons } from "@expo/vector-icons";
+import BannerAd from "../services/BannerAd";
 
 type Props = NativeStackScreenProps<RootStackParamList, "HomeScreen">;
 
@@ -189,6 +190,10 @@ export default function HomeScreen({ navigation, route }: Props) {
 
         <BottomSpace />
       </ScrollContent>
+      {/* 하단 광고 */}
+      <BottomAdContainer>
+        <BannerAd />
+      </BottomAdContainer>
     </Container>
   );
 }
@@ -422,4 +427,13 @@ const MyListArrowContainer = styled.View`
   border-radius: 14px;
   align-items: center;
   justify-content: center;
+`;
+const BottomAdContainer = styled.View`
+  height: 60px;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+  border-top-width: 1px;
+  border-top-color: #e2e8f0;
 `;

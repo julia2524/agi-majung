@@ -9,6 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { getPriorityText } from "../utils/utils";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getCheckedItems, saveCheckedItems } from "../utils/storage";
+import BannerAd from "../services/BannerAd";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ChecklistScreen">;
 
@@ -59,7 +60,7 @@ export default function ChecklistScreen({ navigation, route }: Props) {
   const progress = totalCount === 0 ? 0 : (checkedCount / totalCount) * 100;
 
   return (
-    <Container>
+    <Container edges={["top"]}>
       {/* 1. 상단 뒤로가기 헤더 (고정) */}
       <BabyHeader
         title={categoryName}
@@ -149,6 +150,10 @@ export default function ChecklistScreen({ navigation, route }: Props) {
 
         <BottomSpace />
       </ScrollContent>
+      {/* 하단 광고 */}
+      <BottomAdContainer>
+        <BannerAd />
+      </BottomAdContainer>
     </Container>
   );
 }
@@ -290,4 +295,13 @@ const EmptyText = styled.Text`
 
 const BottomSpace = styled.View`
   height: 40px;
+`;
+const BottomAdContainer = styled.View`
+  height: 60px;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+  border-top-width: 1px;
+  border-top-color: #e2e8f0;
 `;
