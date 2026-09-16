@@ -54,6 +54,21 @@ export async function getBabyProfile(): Promise<BabyProfile | null> {
 }
 
 // -------------------------
+// 아기 정보 다시 설정
+// -------------------------
+
+export async function resetBabyData() {
+  try {
+    await AsyncStorage.multiRemove([
+      STORAGE_KEYS.BABY_PROFILE,
+      STORAGE_KEYS.CHECKED_ITEMS,
+    ]);
+  } catch (error) {
+    console.error("아기 정보 초기화 실패:", error);
+  }
+}
+
+// -------------------------
 // 카테고리별 체크 상태 저장
 // -------------------------
 
@@ -107,5 +122,17 @@ export async function getMyItems(): Promise<MyItem[]> {
   } catch (error) {
     console.error("내 준비물 불러오기 실패:", error);
     return [];
+  }
+}
+
+export async function deleteAllData() {
+  try {
+    await AsyncStorage.multiRemove([
+      STORAGE_KEYS.BABY_PROFILE,
+      STORAGE_KEYS.CHECKED_ITEMS,
+      STORAGE_KEYS.MY_ITEMS,
+    ]);
+  } catch (error) {
+    console.error("데이터 삭제 실패:", error);
   }
 }

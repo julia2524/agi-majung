@@ -5,7 +5,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Mascot from "../types/design-system/ui/Mascot";
 import PrimaryButton from "../types/design-system/ui/PrimaryButton";
 import { RootStackParamList } from "../navigation/types";
-import { saveBabyProfile } from "../utils/storage";
+import { saveBabyProfile } from "../storage/storage";
 
 type Props = NativeStackScreenProps<RootStackParamList, "BabyOrderScreen">;
 

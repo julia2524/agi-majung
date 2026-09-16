@@ -11,7 +11,7 @@ import DueDateScreen from "../screens/DueDateScreen";
 import ChecklistScreen from "../screens/ChecklistScreen";
 
 import { RootStackParamList } from "./types";
-import { getBabyProfile } from "../utils/storage";
+import { getBabyProfile } from "../storage/storage";
 import LoadingScreen from "../screens/LoadingScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

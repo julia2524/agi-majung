@@ -8,7 +8,7 @@ import BabyHeader from "../components/BabyHeader";
 import { Ionicons } from "@expo/vector-icons";
 import { getPriorityText } from "../utils/utils";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getCheckedItems, saveCheckedItems } from "../utils/storage";
+import { getCheckedItems, saveCheckedItems } from "../storage/storage";
 import BannerAd from "../services/BannerAd";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ChecklistScreen">;

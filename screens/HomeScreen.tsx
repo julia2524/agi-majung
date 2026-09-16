@@ -18,7 +18,7 @@ import {
   HomeIcon,
 } from "../components/icons/CategoryIcons";
 import { useFocusEffect } from "@react-navigation/native";
-import { getCheckedItems } from "../utils/storage";
+import { getCheckedItems } from "../storage/storage";
 import { babyItems } from "../data/babyItems";
 import { Ionicons } from "@expo/vector-icons";
 import BannerAd from "../services/BannerAd";
@@ -102,8 +102,22 @@ export default function HomeScreen({ navigation, route }: Props) {
       <ScrollContent showsVerticalScrollIndicator={false}>
         {/* 상단 인사 */}
         <Header>
-          <HeaderText>아기마중</HeaderText>
-          <HeaderSubText>아기 오기 전, 하나씩 준비해봐요 💛</HeaderSubText>
+          <HeaderTop>
+            <HeaderText>아기마중</HeaderText>
+            <SettingsButton
+              activeOpacity={0.7}
+              onPress={() => navigation.navigate("SettingScreen")} // 실제 설정 화면 라우트명으로 변경하세요.
+            >
+              <Ionicons
+                name="settings-outline"
+                size={24}
+                color={theme.colors.text}
+              />
+            </SettingsButton>
+          </HeaderTop>
+          <HeaderBottom>
+            <HeaderSubText>아기 오기 전, 하나씩 준비해봐요 💛</HeaderSubText>
+          </HeaderBottom>
         </Header>
 
         {/* D-Day 카드 */}
@@ -214,7 +228,17 @@ const ScrollContent = styled.ScrollView`
 
 const Header = styled.View`
   margin-top: 8px;
-  margin-bottom: 7px; /* 16 → 10: 다음 D-Day 카드와의 체감 간격 축소 */
+  margin-bottom: 7px;
+`;
+
+const HeaderTop = styled.View`
+  flex: 1;
+  flex-direction: row;
+  justify-content: space-between;
+`;
+
+const HeaderBottom = styled.View`
+  margin-top: -20px;
 `;
 
 const HeaderText = styled.Text`
@@ -227,6 +251,13 @@ const HeaderSubText = styled.Text`
   font-size: ${({ theme }) => theme.typography.body}px;
   font-family: ${({ theme }) => theme.fontFamily.medium};
   color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const SettingsButton = styled.TouchableOpacity`
+  padding: 8px;
+  margin-right: -8px; /* 터치 영역 확보 및 우측 정렬 유지를 위한 음수 마진 */
+  align-items: center;
+  justify-content: center;
 `;
 
 const DDayCard = styled.View`

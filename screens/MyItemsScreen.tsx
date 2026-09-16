@@ -7,7 +7,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import BabyHeader from "../components/BabyHeader"; // 표준 Header 사용
 import { RootStackParamList } from "../navigation/types";
-import { getMyItems, MyItem, saveMyItems } from "../utils/storage";
+import { getMyItems, MyItem, saveMyItems } from "../storage/storage";
 
 type Props = NativeStackScreenProps<RootStackParamList, "MyItemScreen">;
 
