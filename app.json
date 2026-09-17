@@ -10,20 +10,20 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#FFF9F5"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.julia2524.agi-Majung"
+      "bundleIdentifier": "com.mommybear.agi-Majung"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#FFF9F5"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.julia2524.agi_Majung"
+      "package": "com.mommybear.agi_Majung"
     },
     "web": {
       "favicon": "./assets/favicon.png"

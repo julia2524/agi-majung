@@ -12,11 +12,13 @@ import ChecklistScreen from "../screens/ChecklistScreen";
 
 import { RootStackParamList } from "./types";
 import { getBabyProfile } from "../storage/storage";
-import LoadingScreen from "../screens/LoadingScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+interface AppNavigatorProps {
+  onReady: () => void;
+}
 
-export default function AppNavigator() {
+export default function AppNavigator({ onReady }: AppNavigatorProps) {
   const [initialRoute, setInitialRoute] = useState<
     "OnboardingScreen" | "HomeScreen" | null
   >(null);
@@ -25,15 +27,27 @@ export default function AppNavigator() {
     dueDate: string;
     babyOrder: "first" | "secondOrMore";
   } | null>(null);
+  // ========================================
+  // AsyncStorage 확인
+  // ========================================
 
   useEffect(() => {
     const checkBabyProfile = async () => {
-      const profile = await getBabyProfile();
+      try {
+        const profile = await getBabyProfile();
 
-      if (profile) {
-        setBabyProfile(profile);
-        setInitialRoute("HomeScreen");
-      } else {
+        if (profile) {
+          // 기존 사용자
+          setBabyProfile(profile);
+          setInitialRoute("HomeScreen");
+        } else {
+          // 처음 사용하는 사용자
+          setInitialRoute("OnboardingScreen");
+        }
+      } catch (error) {
+        console.error("아기 정보 확인 실패:", error);
+
+        // 문제가 생겨도 Onboarding으로 시작
         setInitialRoute("OnboardingScreen");
       }
     };
@@ -41,6 +55,16 @@ export default function AppNavigator() {
     checkBabyProfile();
   }, []);
 
+  // ========================================
+  // 첫 화면 결정이 끝나면
+  // App에게 "이제 준비됐어" 전달
+  // ========================================
+
+  useEffect(() => {
+    if (initialRoute) {
+      onReady();
+    }
+  }, [initialRoute, onReady]);
   // AsyncStorage 확인하는 동안 잠깐 대기
   if (!initialRoute) {
     return null;

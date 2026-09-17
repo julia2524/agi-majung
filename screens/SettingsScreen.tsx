@@ -20,7 +20,7 @@ export default function SettingScreen({ navigation }: Props) {
   const handleResetBabyData = () => {
     Alert.alert(
       "아기 정보 다시 설정",
-      "예정일과 아기 순서를 다시 설정할까요?\n기존 체크 상태는 초기화됩니다.",
+      "예정일과 아기 순서를 다시 설정할까요?",
       [
         {
           text: "취소",
@@ -28,9 +28,7 @@ export default function SettingScreen({ navigation }: Props) {
         },
         {
           text: "다시 설정",
-          onPress: async () => {
-            await resetBabyData();
-
+          onPress: () => {
             navigation.navigate("DueDateScreen");
           },
         },
@@ -170,10 +168,9 @@ const Section = styled.View`
 `;
 
 const SectionTitle = styled.Text`
-  margin-bottom: 10px;
-  font-size: ${({ theme }) => theme.typography.small}px;
+  font-size: ${({ theme }) => theme.typography.subheading}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
-  color: ${({ theme }) => theme.colors.textSecondary};
+  color: ${({ theme }) => theme.colors.text};
 `;
 
 const MenuButton = styled.TouchableOpacity`
@@ -222,7 +219,7 @@ const MenuTitle = styled.Text`
 `;
 
 const MenuDescription = styled.Text`
-  margin-top: 3px;
+  margin-top: -20px;
   font-size: ${({ theme }) => theme.typography.small}px;
   font-family: ${({ theme }) => theme.fontFamily.regular};
   color: ${({ theme }) => theme.colors.textSecondary};
@@ -287,7 +284,7 @@ const DeleteTitle = styled.Text`
 `;
 
 const DeleteDescription = styled.Text`
-  margin-top: 3px;
+  margin-top: -20px;
   font-size: ${({ theme }) => theme.typography.small}px;
   font-family: ${({ theme }) => theme.fontFamily.regular};
   color: ${({ theme }) => theme.colors.textSecondary};
