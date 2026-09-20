@@ -7,6 +7,7 @@ import Mascot from "../types/design-system/ui/Mascot";
 import PrimaryButton from "../types/design-system/ui/PrimaryButton";
 import { RootStackParamList } from "../navigation/types";
 import CustomCalendar from "../components/CustomCalendar";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type Props = NativeStackScreenProps<RootStackParamList, "DueDateScreen">;
 
@@ -140,12 +141,11 @@ export default function DueDateScreen({ navigation }: Props) {
    Screen
 ============================= */
 
-const Container = styled.View`
+const Container = styled(SafeAreaView)`
   flex: 1;
-  padding: 24px;
+  padding: 0 24px;
   background-color: ${({ theme }) => theme.colors.background};
 `;
-
 const Content = styled.View`
   flex: 1;
   align-items: center;

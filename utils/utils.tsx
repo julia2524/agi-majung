@@ -1,10 +1,12 @@
-export function getPriorityText(priority: "MUST" | "HANDY" | "LATER") {
+import { PriorityLevel } from "../types/baby";
+
+export function getPriorityText(priority: PriorityLevel) {
   switch (priority) {
-    case "MUST":
+    case 3:
       return "꼭 준비";
-    case "HANDY":
+    case 2:
       return "있으면 편함";
-    case "LATER":
+    case 1:
       return "나중에 준비";
     default:
       return "";

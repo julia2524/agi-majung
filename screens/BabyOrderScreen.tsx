@@ -6,6 +6,7 @@ import Mascot from "../types/design-system/ui/Mascot";
 import PrimaryButton from "../types/design-system/ui/PrimaryButton";
 import { RootStackParamList } from "../navigation/types";
 import { saveBabyProfile } from "../storage/storage";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type Props = NativeStackScreenProps<RootStackParamList, "BabyOrderScreen">;
 
@@ -100,9 +101,9 @@ export default function BabyOrderScreen({ navigation, route }: Props) {
   );
 }
 
-const Container = styled.View`
+const Container = styled(SafeAreaView)`
   flex: 1;
-  padding: 24px;
+  padding: 0 24px;
   background-color: ${({ theme }) => theme.colors.background};
 `;
 

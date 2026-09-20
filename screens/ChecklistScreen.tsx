@@ -14,28 +14,42 @@ import BannerAd from "../services/BannerAd";
 type Props = NativeStackScreenProps<RootStackParamList, "ChecklistScreen">;
 
 export default function ChecklistScreen({ navigation, route }: Props) {
-  // theme 객체를 직접 가져옵니다.
   const theme = useTheme();
   const { categoryName, dueDate, babyOrder } = route.params;
 
-  const [checkedItems, setCheckedItems] = useState<string[]>([]);
+  // 💡 id가 숫자/문자열 모두 대응하도록 타입 변경 (number만 쓰신다면 number[]도 가능)
+  const [checkedItems, setCheckedItems] = useState<(string | number)[]>([]);
 
   useEffect(() => {
     const loadCheckedItems = async () => {
       const savedItems = await getCheckedItems();
-
       const categoryCheckedItems = savedItems[categoryName] ?? [];
-
       setCheckedItems(categoryCheckedItems);
     };
 
     loadCheckedItems();
   }, [categoryName]);
-  const categoryItems = useMemo(() => {
-    return babyItems.filter((item) => item.category === categoryName);
-  }, [categoryName]);
 
-  const handleToggle = async (itemId: string) => {
+  // 💡 정렬 로직 (1. 미체크 우선, 2. priority 높은 순)
+  const categoryItems = useMemo(() => {
+    return babyItems
+      .filter((item) => item.category === categoryName)
+      .sort((a, b) => {
+        const aChecked = checkedItems.includes(a.id);
+        const bChecked = checkedItems.includes(b.id);
+
+        // 1. 미체크 항목 우선 정렬
+        if (aChecked !== bChecked) {
+          return aChecked ? 1 : -1;
+        }
+
+        // 2. 우선순위 높은 순 정렬 (3 -> 2 -> 1)
+        return b.priority - a.priority;
+      });
+  }, [categoryName, checkedItems]);
+
+  // 💡 itemId 타입을 string | number로 확장
+  const handleToggle = async (itemId: string | number) => {
     const next = checkedItems.includes(itemId)
       ? checkedItems.filter((id) => id !== itemId)
       : [...checkedItems, itemId];
@@ -43,19 +57,17 @@ export default function ChecklistScreen({ navigation, route }: Props) {
     setCheckedItems(next);
 
     const savedItems = await getCheckedItems();
-
     await saveCheckedItems({
       ...savedItems,
       [categoryName]: next,
     });
   };
 
-  const handleItemPress = (itemId: string) => {
-    navigation.navigate("ItemDetailScreen", { itemId });
+  const handleItemPress = (itemId: string | number) => {
+    navigation.navigate("ItemDetailScreen", { itemId: String(itemId) }); // 라우트 파라미터 규격에 맞춰 필요 시 String 변환
   };
 
   const checkedCount = checkedItems.length;
-
   const totalCount = categoryItems.length;
   const progress = totalCount === 0 ? 0 : (checkedCount / totalCount) * 100;
 
@@ -150,6 +162,7 @@ export default function ChecklistScreen({ navigation, route }: Props) {
 
         <BottomSpace />
       </ScrollContent>
+
       {/* 하단 광고 */}
       <BottomAdContainer>
         <BannerAd />
@@ -263,7 +276,6 @@ const ItemName = styled.Text<{ checked: boolean }>`
 `;
 
 const ItemMeta = styled.Text`
-  margin-top: -20px;
   font-size: ${({ theme }) => theme.typography.small}px;
   font-family: ${({ theme }) => theme.fontFamily.regular};
   color: ${({ theme }) => theme.colors.textSecondary};
@@ -296,6 +308,7 @@ const EmptyText = styled.Text`
 const BottomSpace = styled.View`
   height: 40px;
 `;
+
 const BottomAdContainer = styled.View`
   height: 60px;
   width: 100%;

@@ -6,6 +6,7 @@ import styled from "styled-components/native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/types";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type OnboardNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -45,9 +46,10 @@ export default function OnboardingScreen() {
   );
 }
 
-export const Container = styled.View`
+const Container = styled(SafeAreaView)`
   flex: 1;
-  padding: 24px;
+  padding: 0 24px;
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 const Content = styled.View`

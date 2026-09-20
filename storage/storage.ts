@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
 const STORAGE_KEYS = {
   BABY_PROFILE: "@agimajung/babyProfile",
   CHECKED_ITEMS: "@agimajung/checkedItems",
@@ -10,11 +11,12 @@ export type BabyProfile = {
   babyOrder: "first" | "secondOrMore";
 };
 
-// 카테고리별 체크 상태
-export type CheckedItemsByCategory = Record<string, string[]>;
+// 💡 [수정 1] id가 숫자로 고쳐졌으므로 (number | string)[] 또는 number[]로 변경
+export type CheckedItemsByCategory = Record<string, (number | string)[]>;
 
+// 💡 [수정 2] MyItem의 id 타입도 number | string 으로 맞춤 (숫자 id 기반)
 export type MyItem = {
-  id: string;
+  id: number | string;
   title: string;
   isChecked: boolean;
 };
@@ -104,6 +106,10 @@ export async function getCheckedItems(): Promise<CheckedItemsByCategory> {
   }
 }
 
+// -------------------------
+// 내 준비물 저장
+// -------------------------
+
 export async function saveMyItems(items: MyItem[]) {
   try {
     await AsyncStorage.setItem(STORAGE_KEYS.MY_ITEMS, JSON.stringify(items));
@@ -111,6 +117,10 @@ export async function saveMyItems(items: MyItem[]) {
     console.error("내 준비물 저장 실패:", error);
   }
 }
+
+// -------------------------
+// 내 준비물 불러오기
+// -------------------------
 
 export async function getMyItems(): Promise<MyItem[]> {
   try {
@@ -124,6 +134,10 @@ export async function getMyItems(): Promise<MyItem[]> {
     return [];
   }
 }
+
+// -------------------------
+// 전체 데이터 삭제
+// -------------------------
 
 export async function deleteAllData() {
   try {
