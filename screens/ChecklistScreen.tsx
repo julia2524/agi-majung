@@ -332,6 +332,7 @@ import { getCheckedItems, saveCheckedItems } from "../storage/storage";
 import BannerAd from "../services/BannerAd";
 import { BabyItem } from "../types/baby";
 import { getItemTimingStatus, ItemTimingStatus } from "../utils/itemTiming";
+import { GlossyDot } from "../components/GlossyDot/GlossyDot";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ChecklistScreen">;
 type FilterType = "ALL" | "NOW" | "UPCOMING";
@@ -433,14 +434,16 @@ export default function ChecklistScreen({ navigation, route }: Props) {
       case "NOW":
         return (
           <Badge bg="#FFF3C4">
-            <BadgeText color="#D97706">🟡 지금 준비하면 좋아요</BadgeText>
+            <GlossyDot type="yellow" size={14} />
+            <BadgeText color="#D97706">지금 준비하면 좋아요</BadgeText>
           </Badge>
         );
 
       case "UPCOMING":
         return (
           <Badge bg="#E0F2FE">
-            <BadgeText color="#0284C7">🔵 아직 서두르지 않아도 돼요</BadgeText>
+            <GlossyDot type="blue" size={14} />
+            <BadgeText color="#0284C7"> 아직 서두르지 않아도 돼요 </BadgeText>
           </Badge>
         );
 
@@ -497,8 +500,9 @@ export default function ChecklistScreen({ navigation, route }: Props) {
             active={selectedFilter === "NOW"}
             onPress={() => setSelectedFilter("NOW")}
           >
+            <GlossyDot type="yellow" size={14} />
             <FilterTabText active={selectedFilter === "NOW"}>
-              🟡 지금 준비
+              지금 준비
             </FilterTabText>
           </FilterTab>
 
@@ -506,8 +510,9 @@ export default function ChecklistScreen({ navigation, route }: Props) {
             active={selectedFilter === "UPCOMING"}
             onPress={() => setSelectedFilter("UPCOMING")}
           >
+            <GlossyDot type="blue" size={14} />
             <FilterTabText active={selectedFilter === "UPCOMING"}>
-              🔵 나중에 준비
+              나중에 준비
             </FilterTabText>
           </FilterTab>
         </FilterContainer>
@@ -655,6 +660,8 @@ const FilterTab = styled.TouchableOpacity<{ active: boolean }>`
   border-radius: 20px;
   align-items: center;
   justify-content: center;
+  gap: 4px;
+  flex-direction: row;
   background-color: ${({ active, theme }) =>
     active ? theme.colors.primary : theme.colors.card};
   border-width: 1px;
@@ -739,6 +746,9 @@ const Badge = styled.View<{ bg: string }>`
   background-color: ${({ bg }) => bg};
   padding: 3px 8px;
   border-radius: 6px;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
 `;
 
 const BadgeText = styled.Text<{ color: string }>`

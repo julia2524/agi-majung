@@ -352,15 +352,18 @@ import { RootStackParamList } from "../navigation/types";
 import { babyItems } from "../data/babyItems";
 import { getCategoryIcon, getPriorityText } from "../utils/utils";
 import { getPreparationPeriodText } from "../utils/itemTiming";
+import { GlossyDot } from "../components/GlossyDot/GlossyDot";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ItemDetailScreen">;
 
 // purchaseDecision 코드값을 사용자 친화적인 한글 가이드로 매핑
+// purchaseDecision 코드값을 사용자 친화적인 한글 가이드로 매핑 (dotType 추가)
 const getDecisionGuide = (decision?: string) => {
   switch (decision) {
     case "PREPARE_IN_ADVANCE":
       return {
-        badge: "🟡 미리 준비 추천",
+        dotType: "yellow" as const,
+        badgeText: "미리 준비 추천",
         title: "출산 전에 미리 준비해두면 좋아요",
         desc: "출산 전에 미리 준비하고 세탁·세팅까지 해두면 출산 후에 바로 사용할 수 있어요.",
         bg: "#FFF3C4",
@@ -368,7 +371,8 @@ const getDecisionGuide = (decision?: string) => {
       };
     case "PREPARE_BEFORE_USE":
       return {
-        badge: "🟢 사용 전에 준비",
+        dotType: "green" as const,
+        badgeText: "사용 전에 준비",
         title: "사용하기 전에 준비해두세요",
         desc: "실제로 사용할 시기에 맞춰 준비하면 좋아요. 미리 준비해두거나 필요할 때 바로 구매할 수 있도록 알아두세요.",
         bg: "#E0F2FE",
@@ -376,7 +380,8 @@ const getDecisionGuide = (decision?: string) => {
       };
     case "SEE_AND_BUY":
       return {
-        badge: "🔵 상황 보고 구매",
+        dotType: "blue" as const,
+        badgeText: "상황 보고 구매",
         title: "아기와 상황을 보고 결정해도 좋아요",
         desc: "아기의 성향이나 실제 사용 상황을 확인한 뒤 필요한지 결정해도 늦지 않아요.",
         bg: "#F3E8FF",
@@ -384,7 +389,8 @@ const getDecisionGuide = (decision?: string) => {
       };
     case "BUY_AFTER_BIRTH":
       return {
-        badge: "🔵 출산 후 준비",
+        dotType: "blue" as const,
+        badgeText: "출산 후 준비",
         title: "아기가 태어난 후 준비해도 좋아요",
         desc: "출산 전에 미리 준비하기보다 실제로 필요한지 확인한 뒤 구매해도 괜찮아요.",
         bg: "#F3E8FF",
@@ -392,7 +398,8 @@ const getDecisionGuide = (decision?: string) => {
       };
     default:
       return {
-        badge: "🌿 필요시 구매",
+        dotType: "green" as const,
+        badgeText: "필요시 구매",
         title: "필요에 맞춰 선택하세요",
         desc: "상황에 따라 필요한 시기에 구매하시면 됩니다.",
         bg: "#F1F5F9",
@@ -400,7 +407,6 @@ const getDecisionGuide = (decision?: string) => {
       };
   }
 };
-
 export default function ItemDetailScreen({ route }: Props) {
   const { itemId } = route.params;
   const theme = useTheme();
@@ -455,8 +461,9 @@ export default function ItemDetailScreen({ route }: Props) {
         {/* 2. ✨ [NEW] 직관적인 구매 결정 가이드 카드 (최상단 강조) */}
         <DecisionCard bg={guide.bg}>
           <DecisionBadge>
+            <GlossyDot type={guide.dotType} size={14} />
             <DecisionBadgeText color={guide.color}>
-              {guide.badge}
+              {guide.badgeText}
             </DecisionBadgeText>
           </DecisionBadge>
           <DecisionTitle>{guide.title}</DecisionTitle>
@@ -641,15 +648,20 @@ const DecisionCard = styled.View<{ bg: string }>`
   margin-top: 4px;
 `;
 
+/* 💡 GlossyDot과 텍스트를 수직 정렬하고 간격을 벌려주는 DecisionBadge */
 const DecisionBadge = styled.View`
+  flex-direction: row;
+  align-items: center;
   align-self: flex-start;
-  margin-bottom: 6px;
+  gap: 6px;
+  margin-bottom: 8px;
 `;
 
 const DecisionBadgeText = styled.Text<{ color: string }>`
   font-size: 12px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ color }) => color};
+  include-font-padding: false;
 `;
 
 const DecisionTitle = styled.Text`
