@@ -1148,6 +1148,16 @@ export default function HomeScreen({ navigation, route }: Props) {
   const [checkedMap, setCheckedMap] = useState<
     Record<string, (string | number)[]>
   >({});
+  const dDay = useMemo(() => {
+    const today = new Date();
+    const due = new Date(dueDate);
+
+    today.setHours(0, 0, 0, 0);
+    due.setHours(0, 0, 0, 0);
+
+    const difference = due.getTime() - today.getTime();
+    return Math.ceil(difference / (1000 * 60 * 60 * 24));
+  }, [dueDate]);
 
   // 임신 주수 계산
   const currentWeek = useMemo(() => {
@@ -1254,16 +1264,19 @@ export default function HomeScreen({ navigation, route }: Props) {
             })
           }
         >
-          {/* 1. 상단: 배지 & 마스코트 */}
+          {/* 1. 상단: D-Day 배지 & 마스코트 */}
           <HeroTop>
-            <HeroDesc>
-              임신 {currentWeek}주차 기준으로{"\n"}
-              지금 챙기면 좋은 품목이에요
-            </HeroDesc>
-            <Mascot size={60} />
+            <HeroBadge>
+              <HeroBadgeText>D-{dDay}</HeroBadgeText>
+            </HeroBadge>
+            <Mascot size={52} />
           </HeroTop>
 
           {/* 2. 설명 문구 */}
+          <HeroDesc>
+            임신 {currentWeek}주차 기준으로{"\n"}
+            지금 챙기면 좋은 품목이에요
+          </HeroDesc>
 
           {/* 3. 하단: 수량(왼쪽) + 바로가기 버튼(우측 밀착) */}
           <HeroBottomRow>
@@ -1447,27 +1460,30 @@ const HeroTop = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px; /* 마스코트와 문구 사이 여백 조절 */
 `;
 
+/* 반투명 흰색으로 은은하고 세련된 D-Day 배지 */
 const HeroBadge = styled.View`
   background-color: rgba(255, 255, 255, 0.25);
   padding: 4px 10px;
   border-radius: 12px;
+  align-self: flex-start;
 `;
 
 const HeroBadgeText = styled.Text`
-  font-size: 11px;
+  font-size: 12px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: #ffffff;
+  include-font-padding: false;
 `;
 
 const HeroDesc = styled.Text`
   font-size: 14px;
   font-family: ${({ theme }) => theme.fontFamily.medium};
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.95);
   line-height: 20px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 `;
 
 /* 하단 수량 + 버튼 한 줄 정렬 컨테이너 */
