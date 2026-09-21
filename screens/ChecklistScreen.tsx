@@ -450,7 +450,8 @@ export default function ChecklistScreen({ navigation, route }: Props) {
       case "EXPIRED":
         return (
           <Badge bg="#F3F4F6">
-            <BadgeText color="#6B7280">⚪ 준비해두면 좋아요</BadgeText>
+            <GlossyDot type="white" size={14} />
+            <BadgeText color="#6B7280">준비해두면 좋아요</BadgeText>
           </Badge>
         );
     }
@@ -527,7 +528,7 @@ export default function ChecklistScreen({ navigation, route }: Props) {
               <ItemCard
                 key={item.id}
                 activeOpacity={0.8}
-                onPress={() => handleItemPress(item.id)}
+                onPress={() => handleToggle(item.id)}
               >
                 <CardHeader>
                   <CheckButton
@@ -554,18 +555,32 @@ export default function ChecklistScreen({ navigation, route }: Props) {
                     {/* 시기 직관 배지 */}
                     <BadgeRow>{renderTimingBadge(timingStatus)}</BadgeRow>
                   </ItemTitleContainer>
-
-                  <Ionicons
-                    name="chevron-forward"
-                    size={22}
-                    color={theme.colors.textSecondary}
-                  />
+                  <DetailButton
+                    activeOpacity={0.6}
+                    onPress={() => handleItemPress(item.id)}
+                  >
+                    <Ionicons
+                      name="chevron-forward"
+                      size={20}
+                      color={theme.colors.textSecondary}
+                    />
+                  </DetailButton>
                 </CardHeader>
 
                 {/* 팁 미리보기 (체크 안 된 경우에만 가독성 있게 표시) */}
                 {item.tip && !isChecked && (
                   <TipBox>
-                    <TipText numberOfLines={2}>💡 {item.tip}</TipText>
+                    <TipContentRow>
+                      <TipIcon>
+                        <Ionicons
+                          name="bulb-outline"
+                          size={15}
+                          color={theme.colors.primary}
+                        />
+                      </TipIcon>
+
+                      <TipText numberOfLines={2}>{item.tip}</TipText>
+                    </TipContentRow>
                   </TipBox>
                 )}
               </ItemCard>
@@ -575,8 +590,14 @@ export default function ChecklistScreen({ navigation, route }: Props) {
 
         {filteredCategoryItems.length === 0 && (
           <EmptyContainer>
-            <EmptyEmoji>🧺</EmptyEmoji>
-            <EmptyText>해당 시기에 맞는 준비물이 없습니다.</EmptyText>
+            <EmptyIconWrapper>
+              <Ionicons
+                name="basket-outline"
+                size={44}
+                color={theme.colors.textSecondary}
+              />
+            </EmptyIconWrapper>
+            <EmptyText>준비물 정보를 찾을 수 없어요.</EmptyText>
           </EmptyContainer>
         )}
 
@@ -716,6 +737,12 @@ const CheckCircle = styled.View<{ checked: boolean }>`
 const ItemTitleContainer = styled.View`
   flex: 1;
 `;
+const DetailButton = styled.TouchableOpacity`
+  margin-left: 4px;
+  padding: 2px;
+  justify-content: center;
+  align-items: center;
+`;
 
 const TitleRow = styled.View`
   flex-direction: row;
@@ -738,7 +765,7 @@ const QuantityText = styled.Text`
 `;
 
 const BadgeRow = styled.View`
-  margin-top: 4px;
+  margin-top: -5px;
   flex-direction: row;
 `;
 
@@ -759,16 +786,39 @@ const BadgeText = styled.Text<{ color: string }>`
 
 const TipBox = styled.View`
   margin-top: 10px;
+  min-height: 36px;
   padding: 10px 12px;
+
   background-color: #f8fafc;
   border-radius: 10px;
+
+  justify-content: center;
+`;
+
+const TipContentRow = styled.View`
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 6px;
+`;
+
+const TipIcon = styled.View`
+  width: 15px;
+  height: 16px;
+  margin-top: 3px;
+  justify-content: center;
+  align-items: center;
 `;
 
 const TipText = styled.Text`
-  font-size: 11px;
-  font-family: ${({ theme }) => theme.fontFamily.regular};
+  flex: 1;
+
+  font-size: ${({ theme }) => theme.typography.tiny}px;
+  font-family: ${({ theme }) => theme.fontFamily.medium};
   color: ${({ theme }) => theme.colors.textSecondary};
+
   line-height: 16px;
+
+  include-font-padding: false;
 `;
 
 const EmptyContainer = styled.View`
@@ -780,6 +830,10 @@ const EmptyContainer = styled.View`
 const EmptyEmoji = styled.Text`
   font-size: 42px;
   margin-bottom: 12px;
+`;
+const EmptyIconWrapper = styled.View`
+  margin-bottom: 12px;
+  opacity: 0.7;
 `;
 
 const EmptyText = styled.Text`

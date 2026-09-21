@@ -419,7 +419,13 @@ export default function ItemDetailScreen({ route }: Props) {
       <Container edges={["top"]}>
         <BabyHeader title="" />
         <EmptyContainer>
-          <EmptyEmoji>🔍</EmptyEmoji>
+          <EmptyIconWrapper>
+            <Ionicons
+              name="search-outline"
+              size={32}
+              color={theme.colors.textSecondary}
+            />
+          </EmptyIconWrapper>
           <EmptyText>준비물 정보를 찾을 수 없어요.</EmptyText>
         </EmptyContainer>
       </Container>
@@ -485,10 +491,10 @@ export default function ItemDetailScreen({ route }: Props) {
             <InfoRow>
               <InfoLabel>물려받기</InfoLabel>
               <InfoValue>
-                {item.reuseType === "GOOD" && "물려받아도 좋아요 🎁"}
+                {item.reuseType === "GOOD" && "물려받아도 좋아요"}
                 {item.reuseType === "CHECK" &&
-                  "상태를 확인한 뒤 결정해도 좋아요 🔎"}
-                {item.reuseType === "NEW" && "새 제품을 권장해요 👶"}
+                  "상태를 확인한 뒤 결정해도 좋아요"}
+                {item.reuseType === "NEW" && "새 제품을 권장해요"}
               </InfoValue>
             </InfoRow>
 
@@ -557,7 +563,7 @@ export default function ItemDetailScreen({ route }: Props) {
             </SectionTitle>
 
             <TipCard>
-              <TipText>💡 {item.tip}</TipText>
+              <TipText>{item.tip}</TipText>
             </TipCard>
           </Section>
         )}
@@ -686,7 +692,6 @@ const SectionTitle = styled.View`
   flex-direction: row;
   align-items: center;
   gap: 6px;
-  margin-bottom: 8px;
 `;
 
 const SectionTitleText = styled.Text`
@@ -773,7 +778,6 @@ const TipText = styled.Text`
   line-height: 20px;
   color: ${({ theme }) => theme.colors.text};
 `;
-
 const EmptyContainer = styled.View`
   flex: 1;
   justify-content: center;
@@ -781,14 +785,24 @@ const EmptyContainer = styled.View`
   padding: 40px;
 `;
 
-const EmptyEmoji = styled.Text`
-  font-size: 42px;
+/* 아이콘을 감싸주는 은은한 동그라미 배경 */
+const EmptyIconWrapper = styled.View`
+  width: 64px;
+  height: 64px;
+  border-radius: 32px;
+  background-color: ${({ theme }) => theme.colors.card};
+  border-width: 1px;
+  border-color: ${({ theme }) => theme.colors.border};
+  justify-content: center;
+  align-items: center;
   margin-bottom: 12px;
 `;
 
 const EmptyText = styled.Text`
   font-size: ${({ theme }) => theme.typography.body}px;
+  font-family: ${({ theme }) => theme.fontFamily.medium};
   color: ${({ theme }) => theme.colors.textSecondary};
+  text-align: center;
 `;
 
 const BottomSpace = styled.View`

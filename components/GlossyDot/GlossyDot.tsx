@@ -4,22 +4,34 @@ import styled from "styled-components/native";
 
 // 💡 1. 객체 끝에 `as const`를 붙여 colors 배열을 읽기 전용 튜플 타입으로 고정합니다.
 const GLOSS_THEMES = {
+  white: {
+    colors: ["#FFFFFF", "#F3F0EE", "#D8D1CC"],
+    shadow: "rgba(148, 137, 130, 0.28)",
+  },
+
   yellow: {
-    colors: ["#FFE27A", "#F59E0B", "#D97706"],
-    shadow: "rgba(245, 158, 11, 0.4)",
+    colors: ["#FFF3B0", "#F9D76E", "#E8B84B"],
+    shadow: "rgba(232, 184, 75, 0.35)",
   },
-  green: {
-    colors: ["#A7F3D0", "#10B981", "#059669"],
-    shadow: "rgba(16, 185, 129, 0.4)",
+
+  purple: {
+    colors: ["#E9D9F5", "#C9A8DF", "#A97BC7"],
+    shadow: "rgba(169, 123, 199, 0.35)",
   },
+
   blue: {
-    colors: ["#BAE6FD", "#0EA5E9", "#0284C7"],
-    shadow: "rgba(14, 165, 233, 0.4)",
+    colors: ["#D9F0FA", "#9DD5E8", "#68B8D4"],
+    shadow: "rgba(104, 184, 212, 0.35)",
+  },
+
+  green: {
+    colors: ["#D9F2E5", "#A8DCC2", "#72C19A"],
+    shadow: "rgba(114, 193, 154, 0.35)",
   },
 } as const;
 
 interface GlossyDotProps {
-  type: "yellow" | "green" | "blue";
+  type: "white" | "yellow" | "purple" | "blue" | "green";
   size?: number;
 }
 
