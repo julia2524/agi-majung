@@ -1,324 +1,3 @@
-// import React, { useEffect, useMemo, useState } from "react";
-// import styled, { useTheme } from "styled-components/native";
-// import { NativeStackScreenProps } from "@react-navigation/native-stack";
-
-// import { RootStackParamList } from "../navigation/types";
-// import { babyItems } from "../data/babyItems";
-// import BabyHeader from "../components/BabyHeader";
-// import { Ionicons } from "@expo/vector-icons";
-// import { getPriorityText } from "../utils/utils";
-// import { SafeAreaView } from "react-native-safe-area-context";
-// import { getCheckedItems, saveCheckedItems } from "../storage/storage";
-// import BannerAd from "../services/BannerAd";
-
-// type Props = NativeStackScreenProps<RootStackParamList, "ChecklistScreen">;
-
-// export default function ChecklistScreen({ navigation, route }: Props) {
-//   const theme = useTheme();
-//   const { categoryName, dueDate, babyOrder } = route.params;
-
-//   // 💡 id가 숫자/문자열 모두 대응하도록 타입 변경 (number만 쓰신다면 number[]도 가능)
-//   const [checkedItems, setCheckedItems] = useState<(string | number)[]>([]);
-
-//   useEffect(() => {
-//     const loadCheckedItems = async () => {
-//       const savedItems = await getCheckedItems();
-//       const categoryCheckedItems = savedItems[categoryName] ?? [];
-//       setCheckedItems(categoryCheckedItems);
-//     };
-
-//     loadCheckedItems();
-//   }, [categoryName]);
-
-//   // 💡 정렬 로직 (1. 미체크 우선, 2. priority 높은 순)
-//   const categoryItems = useMemo(() => {
-//     return babyItems
-//       .filter((item) => item.category === categoryName)
-//       .sort((a, b) => {
-//         const aChecked = checkedItems.includes(a.id);
-//         const bChecked = checkedItems.includes(b.id);
-
-//         // 1. 미체크 항목 우선 정렬
-//         if (aChecked !== bChecked) {
-//           return aChecked ? 1 : -1;
-//         }
-
-//         // 2. 우선순위 높은 순 정렬 (3 -> 2 -> 1)
-//         return b.priority - a.priority;
-//       });
-//   }, [categoryName, checkedItems]);
-
-//   // 💡 itemId 타입을 string | number로 확장
-//   const handleToggle = async (itemId: string | number) => {
-//     const next = checkedItems.includes(itemId)
-//       ? checkedItems.filter((id) => id !== itemId)
-//       : [...checkedItems, itemId];
-
-//     setCheckedItems(next);
-
-//     const savedItems = await getCheckedItems();
-//     await saveCheckedItems({
-//       ...savedItems,
-//       [categoryName]: next,
-//     });
-//   };
-
-//   const handleItemPress = (itemId: string | number) => {
-//     navigation.navigate("ItemDetailScreen", { itemId: String(itemId) }); // 라우트 파라미터 규격에 맞춰 필요 시 String 변환
-//   };
-
-//   const checkedCount = checkedItems.length;
-//   const totalCount = categoryItems.length;
-//   const progress = totalCount === 0 ? 0 : (checkedCount / totalCount) * 100;
-
-//   return (
-//     <Container edges={["top"]}>
-//       {/* 1. 상단 뒤로가기 헤더 (고정) */}
-//       <BabyHeader
-//         title={categoryName}
-//         onBackPress={() => {
-//           if (navigation.canGoBack()) {
-//             navigation.goBack();
-//           } else {
-//             navigation.navigate("HomeScreen", { dueDate, babyOrder });
-//           }
-//         }}
-//       />
-
-//       {/* 2. 전체 스크롤 영역 */}
-//       <ScrollContent showsVerticalScrollIndicator={false}>
-//         {/* 진행률 요약 */}
-//         <Header>
-//           <ProgressText>
-//             {checkedCount} / {totalCount} 준비했어요
-//           </ProgressText>
-//         </Header>
-
-//         <ProgressBar>
-//           <ProgressFill progress={progress} />
-//         </ProgressBar>
-
-//         <Description>
-//           필요한 준비물을 확인하고{"\n"}
-//           준비가 끝난 물건은 체크해보세요.
-//         </Description>
-
-//         {/* 준비물 목록 */}
-//         <ItemList>
-//           {categoryItems.map((item) => {
-//             const isChecked = checkedItems.includes(item.id);
-
-//             return (
-//               <ItemCard
-//                 key={item.id}
-//                 activeOpacity={0.8}
-//                 onPress={() => handleItemPress(item.id)}
-//               >
-//                 <CheckButton
-//                   activeOpacity={0.7}
-//                   onPress={() => handleToggle(item.id)}
-//                 >
-//                   <CheckCircle checked={isChecked}>
-//                     {isChecked && (
-//                       <CheckMark>
-//                         <Ionicons
-//                           name="checkmark"
-//                           size={20}
-//                           color={theme.colors.secondary}
-//                         />
-//                       </CheckMark>
-//                     )}
-//                   </CheckCircle>
-//                 </CheckButton>
-
-//                 <ItemContent>
-//                   <ItemName checked={isChecked}>{item.title}</ItemName>
-//                   <ItemMeta>
-//                     {getPriorityText(item.priority)}
-//                     {item.recommendedQuantity
-//                       ? ` · ${item.recommendedQuantity}`
-//                       : ""}
-//                   </ItemMeta>
-//                 </ItemContent>
-
-//                 <Arrow>
-//                   <Ionicons
-//                     name="chevron-forward"
-//                     size={28}
-//                     color={theme.colors.textSecondary}
-//                   />
-//                 </Arrow>
-//               </ItemCard>
-//             );
-//           })}
-//         </ItemList>
-
-//         {categoryItems.length === 0 && (
-//           <EmptyContainer>
-//             <EmptyEmoji>🧺</EmptyEmoji>
-//             <EmptyText>아직 준비물이 등록되지 않았어요.</EmptyText>
-//           </EmptyContainer>
-//         )}
-
-//         <BottomSpace />
-//       </ScrollContent>
-
-//       {/* 하단 광고 */}
-//       <BottomAdContainer>
-//         <BannerAd />
-//       </BottomAdContainer>
-//     </Container>
-//   );
-// }
-
-// /* -----------------------------
-//    Styled Components
-// ----------------------------- */
-
-// const Container = styled(SafeAreaView)`
-//   flex: 1;
-//   background-color: ${({ theme }) => theme.colors.background};
-// `;
-
-// const ScrollContent = styled.ScrollView`
-//   flex: 1;
-//   padding-horizontal: 24px;
-// `;
-
-// const Header = styled.View`
-//   margin-top: 8px;
-// `;
-
-// const ProgressText = styled.Text`
-//   font-size: ${({ theme }) => theme.typography.body}px;
-//   font-family: ${({ theme }) => theme.fontFamily.bold};
-//   color: ${({ theme }) => theme.colors.primary};
-// `;
-
-// const ProgressBar = styled.View`
-//   width: 100%;
-//   height: 10px;
-//   margin-top: 10px;
-//   border-radius: 5px;
-//   background-color: ${({ theme }) => theme.colors.border};
-//   overflow: hidden;
-// `;
-
-// const ProgressFill = styled.View<{ progress: number }>`
-//   width: ${({ progress }) => `${progress}%`};
-//   height: 100%;
-//   border-radius: 5px;
-//   background-color: ${({ theme }) => theme.colors.primary};
-// `;
-
-// const Description = styled.Text`
-//   margin-top: 18px;
-//   font-size: ${({ theme }) => theme.typography.body}px;
-//   font-family: ${({ theme }) => theme.fontFamily.medium};
-//   line-height: 22px;
-//   color: ${({ theme }) => theme.colors.textSecondary};
-// `;
-
-// const ItemList = styled.View`
-//   margin-top: 20px;
-//   gap: 12px;
-// `;
-
-// const ItemCard = styled.TouchableOpacity`
-//   width: 100%;
-//   min-height: 72px;
-//   padding: 14px 16px;
-//   border-radius: 18px;
-//   background-color: ${({ theme }) => theme.colors.card};
-//   border-width: 1px;
-//   border-color: ${({ theme }) => theme.colors.border};
-//   flex-direction: row;
-//   align-items: center;
-// `;
-
-// const CheckButton = styled.TouchableOpacity`
-//   width: 36px;
-//   height: 36px;
-//   align-items: center;
-//   justify-content: center;
-//   margin-right: 10px;
-// `;
-
-// const CheckCircle = styled.View<{ checked: boolean }>`
-//   width: 26px;
-//   height: 26px;
-//   border-radius: 13px;
-//   border-width: 2px;
-//   border-color: ${({ theme, checked }) =>
-//     checked ? theme.colors.primary : theme.colors.border};
-//   background-color: ${({ theme, checked }) =>
-//     checked ? theme.colors.primary : theme.colors.card};
-//   align-items: center;
-//   justify-content: center;
-// `;
-
-// const CheckMark = styled.Text`
-//   font-size: 16px;
-//   font-family: ${({ theme }) => theme.fontFamily.bold};
-//   color: ${({ theme }) => theme.colors.card};
-// `;
-
-// const ItemContent = styled.View`
-//   flex: 1;
-// `;
-
-// const ItemName = styled.Text<{ checked: boolean }>`
-//   font-size: ${({ theme }) => theme.typography.button}px;
-//   font-family: ${({ theme }) => theme.fontFamily.bold};
-//   color: ${({ theme, checked }) =>
-//     checked ? theme.colors.textSecondary : theme.colors.text};
-//   text-decoration-line: ${({ checked }) => (checked ? "line-through" : "none")};
-// `;
-
-// const ItemMeta = styled.Text`
-//   font-size: ${({ theme }) => theme.typography.small}px;
-//   font-family: ${({ theme }) => theme.fontFamily.regular};
-//   color: ${({ theme }) => theme.colors.textSecondary};
-// `;
-
-// const Arrow = styled.Text`
-//   margin-left: 8px;
-//   font-size: 24px;
-//   color: ${({ theme }) => theme.colors.textSecondary};
-// `;
-
-// const EmptyContainer = styled.View`
-//   align-items: center;
-//   justify-content: center;
-//   padding: 50px 20px;
-// `;
-
-// const EmptyEmoji = styled.Text`
-//   font-size: 42px;
-//   margin-bottom: 12px;
-// `;
-
-// const EmptyText = styled.Text`
-//   font-size: ${({ theme }) => theme.typography.body}px;
-//   font-family: ${({ theme }) => theme.fontFamily.medium};
-//   color: ${({ theme }) => theme.colors.textSecondary};
-//   text-align: center;
-// `;
-
-// const BottomSpace = styled.View`
-//   height: 40px;
-// `;
-
-// const BottomAdContainer = styled.View`
-//   height: 60px;
-//   width: 100%;
-//   align-items: center;
-//   justify-content: center;
-//   background-color: #f8fafc;
-//   border-top-width: 1px;
-//   border-top-color: #e2e8f0;
-// `;
-
 import React, { useEffect, useMemo, useState } from "react";
 import styled, { useTheme } from "styled-components/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -362,15 +41,29 @@ export default function ChecklistScreen({ navigation, route }: Props) {
   }, [dueDate]);
 
   // 2. 저장된 체크 데이터 로드
+
   useEffect(() => {
     const loadCheckedItems = async () => {
       const savedItems = await getCheckedItems();
+
+      // 전체 보기
+      // → 모든 실제 카테고리의 체크 상태를 하나로 합친다.
+      if (categoryId === "all") {
+        const allCheckedItems = [...new Set(Object.values(savedItems).flat())];
+
+        setCheckedItems(allCheckedItems);
+        return;
+      }
+
+      // 일반 카테고리 보기
+      // → 해당 카테고리의 체크 상태만 가져온다.
       const categoryCheckedItems = savedItems[categoryName] ?? [];
+
       setCheckedItems(categoryCheckedItems);
     };
 
     loadCheckedItems();
-  }, [categoryName]);
+  }, [categoryId, categoryName]);
 
   // 4. 필터링 및 정렬 로직 (미체크 우선 -> 시기 우선 -> 우선순위 높은 순)
   const filteredCategoryItems = useMemo(() => {
@@ -403,18 +96,71 @@ export default function ChecklistScreen({ navigation, route }: Props) {
   }, [categoryId, categoryName, checkedItems, selectedFilter, currentWeek]);
 
   // 체크 토글
+  // 체크 토글
   const handleToggle = async (itemId: string | number) => {
-    const next = checkedItems.includes(itemId)
-      ? checkedItems.filter((id) => id !== itemId)
-      : [...checkedItems, itemId];
-
-    setCheckedItems(next);
-
     const savedItems = await getCheckedItems();
-    await saveCheckedItems({
+
+    // ==================================================
+    // 전체 보기
+    // ==================================================
+    // "지금 준비할 품목", "아직 괜찮은 품목"은
+    // 실제 카테고리가 아니므로 저장 키로 사용하지 않는다.
+    // 체크한 아이템의 실제 category에 저장한다.
+    // ==================================================
+    if (categoryId === "all") {
+      const targetItem = babyItems.find((item) => item.id === itemId);
+
+      if (!targetItem) {
+        return;
+      }
+
+      const categoryKey = targetItem.category;
+      const categoryItems = savedItems[categoryKey] ?? [];
+
+      const isChecked = categoryItems.includes(itemId);
+
+      const updatedCategoryItems = isChecked
+        ? categoryItems.filter((id) => id !== itemId)
+        : [...categoryItems, itemId];
+
+      const updatedSavedItems = {
+        ...savedItems,
+        [categoryKey]: updatedCategoryItems,
+      };
+
+      await saveCheckedItems(updatedSavedItems);
+
+      // 전체 화면에서 현재 보여주는 체크 상태도 바로 업데이트
+      const allCheckedItems = [
+        ...new Set(Object.values(updatedSavedItems).flat()),
+      ];
+
+      setCheckedItems(allCheckedItems);
+
+      return;
+    }
+
+    // ==================================================
+    // 일반 카테고리 보기
+    // ==================================================
+
+    const categoryItems = savedItems[categoryName] ?? [];
+
+    const isChecked = categoryItems.includes(itemId);
+
+    const updatedCategoryItems = isChecked
+      ? categoryItems.filter((id) => id !== itemId)
+      : [...categoryItems, itemId];
+
+    const updatedSavedItems = {
       ...savedItems,
-      [categoryName]: next,
-    });
+      [categoryName]: updatedCategoryItems,
+    };
+
+    await saveCheckedItems(updatedSavedItems);
+
+    // 현재 카테고리의 체크 상태 업데이트
+    setCheckedItems(updatedCategoryItems);
   };
 
   const handleItemPress = (itemId: string | number) => {
@@ -738,8 +484,9 @@ const ItemTitleContainer = styled.View`
   flex: 1;
 `;
 const DetailButton = styled.TouchableOpacity`
+  width: 44px;
+  height: 44px;
   margin-left: 4px;
-  padding: 2px;
   justify-content: center;
   align-items: center;
 `;
@@ -751,7 +498,7 @@ const TitleRow = styled.View`
 `;
 
 const ItemName = styled.Text<{ checked: boolean }>`
-  font-size: ${({ theme }) => theme.typography.button}px;
+  font-size: ${({ theme }) => theme.typography.body}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ theme, checked }) =>
     checked ? theme.colors.textSecondary : theme.colors.text};
@@ -771,7 +518,7 @@ const BadgeRow = styled.View`
 
 const Badge = styled.View<{ bg: string }>`
   background-color: ${({ bg }) => bg};
-  padding: 3px 8px;
+  padding: 0px 8px;
   border-radius: 6px;
   flex-direction: row;
   align-items: center;

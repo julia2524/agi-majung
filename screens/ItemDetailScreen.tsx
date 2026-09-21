@@ -350,7 +350,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import BabyHeader from "../components/BabyHeader";
 import { RootStackParamList } from "../navigation/types";
 import { babyItems } from "../data/babyItems";
-import { getCategoryIcon, getPriorityText } from "../utils/utils";
+import { getCategoryIcon, getItemIcon, getPriorityText } from "../utils/utils";
 import { getPreparationPeriodText } from "../utils/itemTiming";
 import { GlossyDot } from "../components/GlossyDot/GlossyDot";
 
@@ -443,7 +443,7 @@ export default function ItemDetailScreen({ route }: Props) {
         <ItemHeader>
           <ItemIcon>
             <MaterialCommunityIcons
-              name={getCategoryIcon(item.category)}
+              name={getItemIcon(item.title, item.category) as any}
               size={44}
               color={theme.colors.primary}
             />
@@ -660,7 +660,7 @@ const DecisionBadge = styled.View`
   align-items: center;
   align-self: flex-start;
   gap: 6px;
-  margin-bottom: 8px;
+  margin-bottom: -8px;
 `;
 
 const DecisionBadgeText = styled.Text<{ color: string }>`
@@ -674,7 +674,7 @@ const DecisionTitle = styled.Text`
   font-size: ${({ theme }) => theme.typography.subheading}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: #1e293b;
-  margin-bottom: 4px;
+  margin-bottom: -4px;
 `;
 
 const DecisionDesc = styled.Text`
