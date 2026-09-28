@@ -43,7 +43,7 @@ export type RootStackParamList = {
     categoryName: string;
     dueDate: string;
     babyOrder: "first" | "secondOrMore";
-    initialFilter?: "NOW" | "UPCOMING";
+    initialFilter?: "NOW" | "UPCOMING" | "URGENT";
   };
   MyItemScreen: undefined;
   SettingScreen: undefined;

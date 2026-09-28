@@ -28,10 +28,14 @@ const GLOSS_THEMES = {
     colors: ["#D9F2E5", "#A8DCC2", "#72C19A"],
     shadow: "rgba(114, 193, 154, 0.35)",
   },
+  red: {
+    colors: ["#FDE2E2", "#F5A3A3", "#E96B6B"],
+    shadow: "rgba(233, 107, 107, 0.35)",
+  },
 } as const;
 
 interface GlossyDotProps {
-  type: "white" | "yellow" | "purple" | "blue" | "green";
+  type: "white" | "yellow" | "purple" | "blue" | "green" | "red";
   size?: number;
 }
 

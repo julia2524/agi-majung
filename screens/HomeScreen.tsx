@@ -7,39 +7,70 @@ import { useFocusEffect } from "@react-navigation/native";
 import Mascot from "../types/design-system/ui/Mascot";
 import { RootStackParamList } from "../navigation/types";
 import {
-  HospitalIcon,
-  SleepIcon,
-  BathIcon,
-  MilkIcon,
   ClothesIcon,
-  LaundryIcon,
   BagIcon,
-  MomIcon,
-  HomeIcon,
+  GoodsIcon,
+  FurnitureIcon,
+  ElectronicsIcon,
+  HygieneIcon,
+  CareIcon,
+  ToyBookIcon,
+  FeedingIcon,
 } from "../components/icons/CategoryIcons";
-import { getCheckedItems } from "../storage/storage";
+import { getCheckedItems, getMyItems, MyItem } from "../storage/storage";
 import { babyItems } from "../data/babyItems";
 import BannerAd from "../services/BannerAd";
-import { getItemTimingStatus } from "../utils/itemTiming";
+import { calculateUrgency, getItemTimingStatus } from "../utils/itemTiming";
 import { GlossyDot } from "../components/GlossyDot/GlossyDot";
 
 type Props = NativeStackScreenProps<RootStackParamList, "HomeScreen">;
 
 const categories = [
-  { id: "hospital", name: "출산/병원", Icon: HospitalIcon },
-  { id: "sleep", name: "수면", Icon: SleepIcon },
-  { id: "bath", name: "목욕", Icon: BathIcon },
-  { id: "feeding", name: "수유", Icon: MilkIcon },
-  { id: "clothing", name: "의류", Icon: ClothesIcon },
-  { id: "hygiene", name: "위생/세탁", Icon: LaundryIcon },
-  { id: "outdoor", name: "외출", Icon: BagIcon },
-  { id: "mother", name: "산모", Icon: MomIcon },
-  { id: "life", name: "생활", Icon: HomeIcon },
+  { id: 1, name: "의류", Icon: ClothesIcon },
+  { id: 2, name: "잡화", Icon: GoodsIcon },
+  { id: 3, name: "가구·수납", Icon: FurnitureIcon },
+  { id: 4, name: "가전·디지털", Icon: ElectronicsIcon },
+  { id: 5, name: "생활·위생", Icon: HygieneIcon },
+  { id: 6, name: "케어·건강", Icon: CareIcon },
+  { id: 7, name: "완구·도서", Icon: ToyBookIcon },
+  { id: 8, name: "수유용품", Icon: FeedingIcon },
+  //  { id: 9, name: "나만의 준비물", Icon: BagIcon },
 ];
+
+function formatDDay(dDay: number): string {
+  if (dDay === 0) {
+    return "D-Day";
+  } else if (dDay > 0) {
+    return `D-${dDay}`; // 아직 남은 날 → D-10, D-9 ...
+  } else {
+    return `D+${Math.abs(dDay)}`; // 이미 지난 날 → D+1, D+2 ...
+  }
+}
 
 export default function HomeScreen({ navigation, route }: Props) {
   const theme = useTheme();
   const { dueDate, babyOrder } = route.params;
+  const [myItems, setMyItems] = useState<MyItem[]>([]);
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadMyItems = async () => {
+        const savedItems = await getMyItems();
+        setMyItems(savedItems);
+      };
+
+      loadMyItems();
+    }, []),
+  );
+  const myItemProgress = useMemo(() => {
+    const total = myItems.length;
+    const checked = myItems.filter((item) => item.isChecked).length;
+
+    return {
+      total,
+      checked,
+      percent: total === 0 ? 0 : Math.round((checked / total) * 100),
+    };
+  }, [myItems]);
 
   const [checkedMap, setCheckedMap] = useState<
     Record<string, (string | number)[]>
@@ -71,28 +102,44 @@ export default function HomeScreen({ navigation, route }: Props) {
   // 지금 / 나중에 카운트
   const statusCounts = useMemo(() => {
     let now = 0;
+    let urgent = 0;
     let upcoming = 0;
 
     babyItems.forEach((item) => {
       const status = getItemTimingStatus(item, currentWeek);
-      if (status === "NOW") now++;
-      else if (status === "UPCOMING") upcoming++;
+      if (status === "NOW") {
+        now++;
+      } else if (status === "URGENT") {
+        urgent++;
+      } else if (status === "UPCOMING") {
+        upcoming++;
+      }
     });
 
-    return { now, upcoming };
+    return { now, urgent, upcoming };
   }, [currentWeek]);
 
   // 카테고리별 진행률
+
   const categoryProgressMap = useMemo(() => {
     const result: Record<
-      string,
+      string | number,
       { total: number; checked: number; percent: number }
     > = {};
 
     categories.forEach((cat) => {
-      const catItems = babyItems.filter((item) => item.category === cat.name);
+      // 1. categoryId(숫자)로 데이터 필터링 (하위 호환을 위해 cat.name도 fallback 체크)
+      const catItems = babyItems.filter(
+        (item) => item.categoryId === cat.id || item.category === cat.name,
+      );
       const total = catItems.length;
-      const checkedList = checkedMap[cat.name] || [];
+
+      // 2. checkedMap의 Key가 cat.id (숫자/문자열) 또는 cat.name 기준 모두 대응
+      const checkedList =
+        checkedMap[cat.id] ||
+        checkedMap[String(cat.id)] ||
+        checkedMap[cat.name] ||
+        [];
       const checked = new Set(checkedList).size;
       const percent = total === 0 ? 0 : Math.round((checked / total) * 100);
 
@@ -105,7 +152,7 @@ export default function HomeScreen({ navigation, route }: Props) {
   // HomeScreen.tsx 수정
 
   // 1. 전체 아이템 수 (categories에 속한 아이템만 기준으로 맞추거나 babyItems 전체 사용)
-  const totalCount = babyItems.length;
+  const totalCount = babyItems.length + myItems.length;
 
   // 2. 전체 체크된 아이템 수
   const totalCheckedCount = useMemo(() => {
@@ -115,9 +162,13 @@ export default function HomeScreen({ navigation, route }: Props) {
     );
 
     // babyItems 중 체크된 항목 카운트
-    return babyItems.filter((item) => allCheckedIds.has(String(item.id)))
-      .length;
-  }, [checkedMap]);
+    const checkedBabyItems = babyItems.filter((item) =>
+      allCheckedIds.has(String(item.id)),
+    ).length;
+    const checkedMyItems = myItems.filter((item) => item.isChecked).length;
+
+    return checkedBabyItems + checkedMyItems;
+  }, [checkedMap, myItems]);
   const totalProgressPercent =
     totalCount === 0 ? 0 : Math.round((totalCheckedCount / totalCount) * 100);
 
@@ -141,9 +192,9 @@ export default function HomeScreen({ navigation, route }: Props) {
     }, []),
   );
 
-  const handleCategoryPress = (categoryId: string, categoryName: string) => {
+  const handleCategoryPress = (categoryId: number, categoryName: string) => {
     navigation.navigate("ChecklistScreen", {
-      categoryId,
+      categoryId: String(categoryId),
       categoryName,
       dueDate,
       babyOrder,
@@ -187,7 +238,7 @@ export default function HomeScreen({ navigation, route }: Props) {
           {/* 1. 상단: D-Day 배지 & 마스코트 */}
           <HeroTop>
             <HeroBadge>
-              <HeroBadgeText>D-{dDay}</HeroBadgeText>
+              <HeroBadgeText>{formatDDay(dDay)}</HeroBadgeText>
             </HeroBadge>
           </HeroTop>
           {/* 2. 설명 문구 */}
@@ -226,25 +277,25 @@ export default function HomeScreen({ navigation, route }: Props) {
           </ProgressBottom>
         </ProgressCard>
 
-        {/* ========== 3. 아직 괜찮은 것 (작게) ========== */}
+        {/* ========== 3. 지금 서둘러야 하는 것 ========== */}
         <LaterCard
           activeOpacity={0.8}
           onPress={() =>
             navigation.navigate("ChecklistScreen", {
               categoryId: "all",
-              categoryName: "아직 괜찮은 품목",
+              categoryName: "지금 서둘러야 하는 품목",
               dueDate,
               babyOrder,
-              initialFilter: "UPCOMING",
+              initialFilter: "URGENT",
             })
           }
         >
           <LaterLeft>
-            <GlossyDot type="blue" size={14} />
+            <GlossyDot type="red" size={14} />
             <LaterText>
               {" "}
-              아직 서두르지 않아도 되는 품목{" "}
-              <LaterCount>{statusCounts.upcoming}개</LaterCount>
+              지금이라도 서둘러야 하는 품목{" "}
+              <LaterCount>{statusCounts.urgent}개</LaterCount>
             </LaterText>
           </LaterLeft>
           <Ionicons
@@ -287,7 +338,6 @@ export default function HomeScreen({ navigation, route }: Props) {
                 <Icon size={34} />
                 <CategoryName>{name}</CategoryName>
 
-                {/* 카테고리별 진행률 */}
                 <CategoryProgressWrapper>
                   <CategoryProgressBar>
                     <CategoryProgressFill progress={prog.percent} />
@@ -299,6 +349,35 @@ export default function HomeScreen({ navigation, route }: Props) {
               </CategoryCard>
             );
           })}
+          <CategoryCard
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate("MyItemScreen")}
+          >
+            {myItemProgress.total > 0 &&
+              myItemProgress.checked === myItemProgress.total && (
+                <DoneBadge>
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={16}
+                    color={theme.colors.primary}
+                  />
+                </DoneBadge>
+              )}
+
+            <BagIcon size={34} />
+
+            <CategoryName>나만의 준비물</CategoryName>
+
+            <CategoryProgressWrapper>
+              <CategoryProgressBar>
+                <CategoryProgressFill progress={myItemProgress.percent} />
+              </CategoryProgressBar>
+
+              <CategoryCountText>
+                {myItemProgress.checked}/{myItemProgress.total}
+              </CategoryCountText>
+            </CategoryProgressWrapper>
+          </CategoryCard>
         </CategoryGrid>
         {/* ========== 5. 나만의 준비물 ========== */}
         <MyListCard

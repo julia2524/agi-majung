@@ -49,7 +49,7 @@ export default function MyItemScreen({ navigation }: Props) {
     setModalVisible(false);
   };
   // 체크 토글
-  const handleToggle = async (id: string) => {
+  const handleToggle = async (id: string | number) => {
     const nextItems = items.map((item) =>
       item.id === id
         ? {
@@ -65,7 +65,7 @@ export default function MyItemScreen({ navigation }: Props) {
   };
 
   // 준비물 삭제
-  const handleDeleteItem = async (id: string) => {
+  const handleDeleteItem = async (id: string | number) => {
     const nextItems = items.filter((item) => item.id !== id);
 
     setItems(nextItems);

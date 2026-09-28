@@ -15,11 +15,46 @@ export type PurchaseDecisionType =
   | "SEE_AND_BUY" // 🔵 실제 사용 여부 보고 준비해도 되는 것 -아기/상황을 보고 결정
   | "BUY_AFTER_BIRTH"; // ⚪ 출산 후 필요할 때 사도 되는 것 -출산 전에 없어도 괜찮음
 
-export type ReuseType = "GOOD" | "CHECK" | "NEW";
+// 4. 중고/당근 거래 적합도
+export type SecondHandType = "GOOD" | "CHECK" | "NEW";
+// [마이그레이션용] 기존 ReuseType 마핑용
+export type ReuseType = SecondHandType;
 
+export const categories = [
+  { id: 1, name: "의류" },
+  { id: 2, name: "잡화" },
+  { id: 3, name: "가구,수납" },
+  { id: 4, name: "가전,디지털" },
+  { id: 5, name: "생활,위생" },
+  { id: 6, name: "케어,건강" },
+  { id: 7, name: "완구,도서" },
+  { id: 8, name: "수유용품" },
+  { id: 9, name: "나만의 준비물" },
+];
+export const tags = [
+  { id: 1, name: "수유" },
+  { id: 2, name: "수면" },
+  { id: 3, name: "외출" },
+  { id: 4, name: "위생" },
+  { id: 5, name: "배변" },
+  { id: 6, name: "목욕" },
+  { id: 7, name: "놀이,발달" },
+  { id: 8, name: "출산가방" },
+  { id: 9, name: "산모케어" },
+  { id: 10, name: "출산준비" },
+  { id: 11, name: "아기케어" },
+];
 export interface BabyItem {
   id: number;
-  category: string;
+
+  // [신규] ID 체계
+  categoryId?: number; // categories 마스터의 id
+  tagIds?: number[]; // tags 마스터의 id 배열 (N:M 멀티 태깅)
+
+  // [하위 호환용] 기존 UI가 덜 고쳐졌을 때 터지는 것을 방지
+  category?: string;
+  reuseType: ReuseType; // 하위 호환용 (= secondHandType 동일값 세팅)
+
   title: string;
   priority: PriorityLevel;
 
@@ -35,8 +70,10 @@ export interface BabyItem {
   recommendedQuantity: string | null;
   noticeTag: string | null;
 
-  // 물려받기/중고 구매 판단
-  reuseType: ReuseType;
+  // [신규/개선] 첫째/둘째 분기용
+  secondHandType?: SecondHandType; // 타인 중고/당근 구매 적합도
+  isReusableFromFirst?: boolean; // 첫째 물건 둘째 재사용 가능 여부
+  reuseGuideNote?: string | null; // 첫째 물건 재사용 시 상세 체크포인트
 
   review: string;
   tip: string;
