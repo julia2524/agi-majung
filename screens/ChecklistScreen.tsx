@@ -14,7 +14,33 @@ import { getItemTimingStatus, ItemTimingStatus } from "../utils/itemTiming";
 import { GlossyDot } from "../components/GlossyDot/GlossyDot";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ChecklistScreen">;
-type FilterType = "ALL" | "NOW" | "UPCOMING";
+type FilterType = "ALL" | "NOW" | "UPCOMING" | "URGENT";
+type TagType =
+  | "ALL"
+  | "수유"
+  | "수면"
+  | "외출"
+  | "위생"
+  | "배변"
+  | "목욕"
+  | "놀이,발달"
+  | "출산가방"
+  | "산모케어"
+  | "출산준비"
+  | "아기케어";
+const TAGS: { id: number; name: Exclude<TagType, "ALL"> }[] = [
+  { id: 1, name: "수유" },
+  { id: 2, name: "수면" },
+  { id: 3, name: "외출" },
+  { id: 4, name: "위생" },
+  { id: 5, name: "배변" },
+  { id: 6, name: "목욕" },
+  { id: 7, name: "놀이,발달" },
+  { id: 8, name: "출산가방" },
+  { id: 9, name: "산모케어" },
+  { id: 10, name: "출산준비" },
+  { id: 11, name: "아기케어" },
+];
 
 export default function ChecklistScreen({ navigation, route }: Props) {
   const theme = useTheme();
@@ -25,6 +51,7 @@ export default function ChecklistScreen({ navigation, route }: Props) {
   const [selectedFilter, setSelectedFilter] = useState<FilterType>(
     initialFilter || "ALL",
   );
+  const [selectedTag, setSelectedTag] = useState<TagType>("ALL");
 
   // 1. 현재 주수 계산
   const currentWeek = useMemo(() => {
@@ -66,35 +93,80 @@ export default function ChecklistScreen({ navigation, route }: Props) {
   }, [categoryId, categoryName]);
 
   // 4. 필터링 및 정렬 로직 (미체크 우선 -> 시기 우선 -> 우선순위 높은 순)
+  // const filteredCategoryItems = useMemo(() => {
+  //   // 카테고리 필터링 ("all" 카테고리면 전체 데이터 사용)
+  //   let items =
+  //     categoryId === "all"
+  //       ? babyItems
+  //       : babyItems.filter((item) => item.category === categoryName);
+
+  //   // 시기 상태별 필터링
+  //   if (selectedFilter !== "ALL") {
+  //     items = items.filter(
+  //       (item) => getItemTimingStatus(item, currentWeek) === selectedFilter,
+  //     );
+  //   }
+
+  //   // 정렬
+  //   return items.sort((a, b) => {
+  //     const aChecked = checkedItems.includes(a.id);
+  //     const bChecked = checkedItems.includes(b.id);
+
+  //     // 1. 미체크 항목 우선
+  //     if (aChecked !== bChecked) {
+  //       return aChecked ? 1 : -1;
+  //     }
+
+  //     // 2. 우선순위 높은 순 (3 -> 2 -> 1)
+  //     return b.priority - a.priority;
+  //   });
+  // }, [categoryId, categoryName, checkedItems, selectedFilter, currentWeek]);
   const filteredCategoryItems = useMemo(() => {
-    // 카테고리 필터링 ("all" 카테고리면 전체 데이터 사용)
+    // 1. 카테고리 필터
     let items =
       categoryId === "all"
         ? babyItems
         : babyItems.filter((item) => item.category === categoryName);
 
-    // 시기 상태별 필터링
+    // 2. 시기 필터
     if (selectedFilter !== "ALL") {
       items = items.filter(
         (item) => getItemTimingStatus(item, currentWeek) === selectedFilter,
       );
     }
 
-    // 정렬
+    // 3. 태그 필터
+    if (selectedTag !== "ALL") {
+      const selectedTagInfo = TAGS.find((tag) => tag.name === selectedTag);
+
+      if (selectedTagInfo) {
+        items = items.filter((item) =>
+          item.tagIds?.includes(selectedTagInfo.id),
+        );
+      }
+    }
+
+    // 4. 정렬
     return items.sort((a, b) => {
       const aChecked = checkedItems.includes(a.id);
       const bChecked = checkedItems.includes(b.id);
 
-      // 1. 미체크 항목 우선
+      // 미체크 우선
       if (aChecked !== bChecked) {
         return aChecked ? 1 : -1;
       }
 
-      // 2. 우선순위 높은 순 (3 -> 2 -> 1)
+      // 우선순위 높은 순
       return b.priority - a.priority;
     });
-  }, [categoryId, categoryName, checkedItems, selectedFilter, currentWeek]);
-
+  }, [
+    categoryId,
+    categoryName,
+    checkedItems,
+    selectedFilter,
+    selectedTag,
+    currentWeek,
+  ]);
   // 체크 토글
   // 체크 토글
   const handleToggle = async (itemId: string | number) => {
@@ -115,6 +187,10 @@ export default function ChecklistScreen({ navigation, route }: Props) {
       }
 
       const categoryKey = targetItem.category;
+      if (!categoryKey) {
+        return;
+      }
+
       const categoryItems = savedItems[categoryKey] ?? [];
 
       const isChecked = categoryItems.includes(itemId);
@@ -163,8 +239,8 @@ export default function ChecklistScreen({ navigation, route }: Props) {
     setCheckedItems(updatedCategoryItems);
   };
 
-  const handleItemPress = (itemId: string | number) => {
-    navigation.navigate("ItemDetailScreen", { itemId: String(itemId) });
+  const handleItemPress = (itemId: number) => {
+    navigation.navigate("ItemDetailScreen", { itemId });
   };
   const checkedCount = filteredCategoryItems.filter((item) =>
     checkedItems.includes(item.id),
@@ -177,6 +253,13 @@ export default function ChecklistScreen({ navigation, route }: Props) {
   // 상태 배지 렌더러
   const renderTimingBadge = (status: ItemTimingStatus) => {
     switch (status) {
+      case "URGENT":
+        return (
+          <Badge bg="#FEE2E2">
+            <GlossyDot type="red" size={14} />
+            <BadgeText color="#DC2626">지금 서둘러 준비해요</BadgeText>
+          </Badge>
+        );
       case "NOW":
         return (
           <Badge bg="#FFF3C4">
@@ -242,6 +325,15 @@ export default function ChecklistScreen({ navigation, route }: Props) {
               전체
             </FilterTabText>
           </FilterTab>
+          <FilterTab
+            active={selectedFilter === "URGENT"}
+            onPress={() => setSelectedFilter("URGENT")}
+          >
+            <GlossyDot type="red" size={14} />
+            <FilterTabText active={selectedFilter === "URGENT"}>
+              이제 서둘러요
+            </FilterTabText>
+          </FilterTab>
 
           <FilterTab
             active={selectedFilter === "NOW"}
@@ -263,7 +355,29 @@ export default function ChecklistScreen({ navigation, route }: Props) {
             </FilterTabText>
           </FilterTab>
         </FilterContainer>
+        <TagScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingRight: 20, // 스크롤 끝까지 밀었을 때 오른쪽 끝 여백 유지
+          }}
+        >
+          {TAGS.map((tag, index) => {
+            const isSelected = selectedTag === tag.name;
+            const isLast = index === TAGS.length - 1; // 💡 마지막 아이템 여부 확인
 
+            return (
+              <TagButton
+                key={tag.id}
+                selected={isSelected}
+                isLast={isLast} // 💡 isLast 전달
+                onPress={() => setSelectedTag(isSelected ? "ALL" : tag.name)}
+              >
+                <TagText selected={isSelected}>#{tag.name}</TagText>
+              </TagButton>
+            );
+          })}
+        </TagScrollView>
         {/* 준비물 목록 */}
         <ItemList>
           {filteredCategoryItems.map((item) => {
@@ -602,4 +716,38 @@ const BottomAdContainer = styled.View`
   background-color: #f8fafc;
   border-top-width: 1px;
   border-top-color: #e2e8f0;
+`;
+
+const TagScrollView = styled.ScrollView`
+  margin-top: 10px;
+  margin-bottom: 6px;
+`;
+
+// isLast 프로퍼티 추가
+const TagButton = styled.TouchableOpacity<{
+  selected: boolean;
+  isLast?: boolean;
+}>`
+  padding: 7px 13px;
+  /* 마지막 태그일 때는 margin-right를 0으로 설정 */
+  margin-right: ${({ isLast }) => (isLast ? -7 : 7)}px;
+
+  border-radius: 18px;
+
+  background-color: ${({ selected, theme }) =>
+    selected ? theme.colors.primary : theme.colors.card};
+
+  border-width: 1px;
+
+  border-color: ${({ selected, theme }) =>
+    selected ? theme.colors.primary : theme.colors.border};
+`;
+
+const TagText = styled.Text<{ selected: boolean }>`
+  font-size: 11px;
+
+  font-family: ${({ theme }) => theme.fontFamily.bold};
+
+  color: ${({ selected, theme }) =>
+    selected ? "#FFFFFF" : theme.colors.textSecondary};
 `;

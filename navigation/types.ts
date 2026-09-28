@@ -36,7 +36,7 @@ export type RootStackParamList = {
     babyOrder: "first" | "secondOrMore";
   };
   ItemDetailScreen: {
-    itemId: string;
+    itemId: number;
   };
   ChecklistScreen: {
     categoryId: string;

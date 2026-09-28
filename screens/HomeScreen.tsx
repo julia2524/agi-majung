@@ -254,14 +254,25 @@ export default function HomeScreen({ navigation, route }: Props) {
             </HeroCountGroup>
 
             <HeroButton>
-              <HeroButtonText>바로 확인하기</HeroButtonText>
+              <HeroButtonText>전체 확인하기</HeroButtonText>
               <Ionicons name="arrow-forward" size={14} color="#FFFFFF" />
             </HeroButton>
           </HeroBottomRow>
         </HeroCard>
 
         {/* ========== 2. 내가 이만큼 준비했네 ========== */}
-        <ProgressCard>
+        <ProgressCard
+          activeOpacity={0.85}
+          onPress={() =>
+            navigation.navigate("ChecklistScreen", {
+              categoryId: "all",
+              categoryName: "지금 준비할 품목",
+              dueDate,
+              babyOrder,
+              initialFilter: "NOW",
+            })
+          }
+        >
           <ProgressTop>
             <ProgressLabel>전체 준비 현황</ProgressLabel>
             <ProgressPercent>{totalProgressPercent}%</ProgressPercent>
@@ -533,8 +544,9 @@ const HeroButtonText = styled.Text`
   color: #ffffff;
   include-font-padding: false;
 `;
+
 /* 진행률 카드 */
-const ProgressCard = styled.View`
+const ProgressCard = styled.TouchableOpacity`
   background-color: ${({ theme }) => theme.colors.card};
   border-radius: 18px;
   padding: 16px 18px;

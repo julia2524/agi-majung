@@ -7,13 +7,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import BabyHeader from "../components/BabyHeader";
 import { RootStackParamList } from "../navigation/types";
 import { babyItems } from "../data/babyItems";
-import { getCategoryIcon, getItemIcon, getPriorityText } from "../utils/utils";
+import { getItemIcon, getPriorityText } from "../utils/utils";
 import { getPreparationPeriodText } from "../utils/itemTiming";
 import { GlossyDot } from "../components/GlossyDot/GlossyDot";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ItemDetailScreen">;
 
-// purchaseDecision 코드값을 사용자 친화적인 한글 가이드로 매핑
 // purchaseDecision 코드값을 사용자 친화적인 한글 가이드로 매핑 (dotType 추가)
 const getDecisionGuide = (decision?: string) => {
   switch (decision) {
@@ -68,8 +67,8 @@ export default function ItemDetailScreen({ route }: Props) {
   const { itemId } = route.params;
   const theme = useTheme();
 
-  // itemId가 string으로 오므로 데이터상의 id(number 또는 string)와 유연하게 비교
-  const item = babyItems.find((i) => String(i.id) === String(itemId));
+  // 2. itemId를 숫자형(Number)으로 변환하여 안전하게 찾습니다.
+  const item = babyItems.find((i) => Number(i.id) === Number(itemId));
 
   if (!item) {
     return (
@@ -88,7 +87,6 @@ export default function ItemDetailScreen({ route }: Props) {
       </Container>
     );
   }
-
   const guide = getDecisionGuide(item.purchaseDecision);
 
   return (
@@ -100,7 +98,7 @@ export default function ItemDetailScreen({ route }: Props) {
         <ItemHeader>
           <ItemIcon>
             <MaterialCommunityIcons
-              name={getItemIcon(item.title, item.category) as any}
+              name={getItemIcon(item.title, item.categoryId) as any}
               size={44}
               color={theme.colors.primary}
             />
