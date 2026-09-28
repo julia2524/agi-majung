@@ -15,20 +15,8 @@ import { GlossyDot } from "../components/GlossyDot/GlossyDot";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ChecklistScreen">;
 type FilterType = "ALL" | "NOW" | "UPCOMING" | "URGENT";
-type TagType =
-  | "ALL"
-  | "수유"
-  | "수면"
-  | "외출"
-  | "위생"
-  | "배변"
-  | "목욕"
-  | "놀이,발달"
-  | "출산가방"
-  | "산모케어"
-  | "출산준비"
-  | "아기케어";
-const TAGS: { id: number; name: Exclude<TagType, "ALL"> }[] = [
+
+const TAGS: { id: number; name: string }[] = [
   { id: 1, name: "수유" },
   { id: 2, name: "수면" },
   { id: 3, name: "외출" },
@@ -51,8 +39,7 @@ export default function ChecklistScreen({ navigation, route }: Props) {
   const [selectedFilter, setSelectedFilter] = useState<FilterType>(
     initialFilter || "ALL",
   );
-  const [selectedTag, setSelectedTag] = useState<TagType>("ALL");
-
+  const [selectedTags, setSelectedTags] = useState<number[]>([]);
   // 1. 현재 주수 계산
   const currentWeek = useMemo(() => {
     const today = new Date();
@@ -93,34 +80,7 @@ export default function ChecklistScreen({ navigation, route }: Props) {
   }, [categoryId, categoryName]);
 
   // 4. 필터링 및 정렬 로직 (미체크 우선 -> 시기 우선 -> 우선순위 높은 순)
-  // const filteredCategoryItems = useMemo(() => {
-  //   // 카테고리 필터링 ("all" 카테고리면 전체 데이터 사용)
-  //   let items =
-  //     categoryId === "all"
-  //       ? babyItems
-  //       : babyItems.filter((item) => item.category === categoryName);
 
-  //   // 시기 상태별 필터링
-  //   if (selectedFilter !== "ALL") {
-  //     items = items.filter(
-  //       (item) => getItemTimingStatus(item, currentWeek) === selectedFilter,
-  //     );
-  //   }
-
-  //   // 정렬
-  //   return items.sort((a, b) => {
-  //     const aChecked = checkedItems.includes(a.id);
-  //     const bChecked = checkedItems.includes(b.id);
-
-  //     // 1. 미체크 항목 우선
-  //     if (aChecked !== bChecked) {
-  //       return aChecked ? 1 : -1;
-  //     }
-
-  //     // 2. 우선순위 높은 순 (3 -> 2 -> 1)
-  //     return b.priority - a.priority;
-  //   });
-  // }, [categoryId, categoryName, checkedItems, selectedFilter, currentWeek]);
   const filteredCategoryItems = useMemo(() => {
     // 1. 카테고리 필터
     let items =
@@ -136,14 +96,11 @@ export default function ChecklistScreen({ navigation, route }: Props) {
     }
 
     // 3. 태그 필터
-    if (selectedTag !== "ALL") {
-      const selectedTagInfo = TAGS.find((tag) => tag.name === selectedTag);
-
-      if (selectedTagInfo) {
-        items = items.filter((item) =>
-          item.tagIds?.includes(selectedTagInfo.id),
-        );
-      }
+    // 여러 태그 선택 시 OR 조건
+    if (selectedTags.length > 0) {
+      items = items.filter((item) =>
+        item.tagIds?.some((tagId) => selectedTags.includes(tagId)),
+      );
     }
 
     // 4. 정렬
@@ -164,7 +121,7 @@ export default function ChecklistScreen({ navigation, route }: Props) {
     categoryName,
     checkedItems,
     selectedFilter,
-    selectedTag,
+    selectedTags,
     currentWeek,
   ]);
   // 체크 토글
@@ -241,6 +198,17 @@ export default function ChecklistScreen({ navigation, route }: Props) {
 
   const handleItemPress = (itemId: number) => {
     navigation.navigate("ItemDetailScreen", { itemId });
+  };
+  const handleTagPress = (tagId: number) => {
+    setSelectedTags((prev) => {
+      // 이미 선택된 태그 → 제거
+      if (prev.includes(tagId)) {
+        return prev.filter((id) => id !== tagId);
+      }
+
+      // 선택되지 않은 태그 → 추가
+      return [...prev, tagId];
+    });
   };
   const checkedCount = filteredCategoryItems.filter((item) =>
     checkedItems.includes(item.id),
@@ -363,15 +331,15 @@ export default function ChecklistScreen({ navigation, route }: Props) {
           }}
         >
           {TAGS.map((tag, index) => {
-            const isSelected = selectedTag === tag.name;
-            const isLast = index === TAGS.length - 1; // 💡 마지막 아이템 여부 확인
+            const isSelected = selectedTags.includes(tag.id);
+            const isLast = index === TAGS.length - 1;
 
             return (
               <TagButton
                 key={tag.id}
                 selected={isSelected}
-                isLast={isLast} // 💡 isLast 전달
-                onPress={() => setSelectedTag(isSelected ? "ALL" : tag.name)}
+                isLast={isLast}
+                onPress={() => handleTagPress(tag.id)}
               >
                 <TagText selected={isSelected}>#{tag.name}</TagText>
               </TagButton>
