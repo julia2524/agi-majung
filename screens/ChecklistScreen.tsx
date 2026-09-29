@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled, { useTheme } from "styled-components/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -12,6 +12,7 @@ import BannerAd from "../services/BannerAd";
 import { BabyItem } from "../types/baby";
 import { getItemTimingStatus, ItemTimingStatus } from "../utils/itemTiming";
 import { GlossyDot } from "../components/GlossyDot/GlossyDot";
+import { ScrollView } from "react-native";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ChecklistScreen">;
 type FilterType = "ALL" | "NOW" | "UPCOMING" | "URGENT";
@@ -32,6 +33,7 @@ const TAGS: { id: number; name: string }[] = [
 
 export default function ChecklistScreen({ navigation, route }: Props) {
   const theme = useTheme();
+  const scrollRef = useRef<ScrollView>(null);
   const { categoryId, categoryName, dueDate, babyOrder, initialFilter } =
     route.params;
 
@@ -39,6 +41,7 @@ export default function ChecklistScreen({ navigation, route }: Props) {
   const [selectedFilter, setSelectedFilter] = useState<FilterType>(
     initialFilter || "ALL",
   );
+
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
   // 1. 현재 주수 계산
   const currentWeek = useMemo(() => {
@@ -55,7 +58,6 @@ export default function ChecklistScreen({ navigation, route }: Props) {
   }, [dueDate]);
 
   // 2. 저장된 체크 데이터 로드
-
   useEffect(() => {
     const loadCheckedItems = async () => {
       const savedItems = await getCheckedItems();
@@ -80,13 +82,17 @@ export default function ChecklistScreen({ navigation, route }: Props) {
   }, [categoryId, categoryName]);
 
   // 4. 필터링 및 정렬 로직 (미체크 우선 -> 시기 우선 -> 우선순위 높은 순)
-
+  const selectedCategoryId = categoryId === "all" ? null : Number(categoryId);
   const filteredCategoryItems = useMemo(() => {
     // 1. 카테고리 필터
     let items =
       categoryId === "all"
         ? babyItems
-        : babyItems.filter((item) => item.category === categoryName);
+        : babyItems.filter(
+            (item) =>
+              item.categoryId === Number(categoryId) ||
+              item.category === categoryName,
+          );
 
     // 2. 시기 필터
     if (selectedFilter !== "ALL") {
@@ -96,7 +102,6 @@ export default function ChecklistScreen({ navigation, route }: Props) {
     }
 
     // 3. 태그 필터
-    // 여러 태그 선택 시 OR 조건
     if (selectedTags.length > 0) {
       items = items.filter((item) =>
         item.tagIds?.some((tagId) => selectedTags.includes(tagId)),
@@ -104,16 +109,14 @@ export default function ChecklistScreen({ navigation, route }: Props) {
     }
 
     // 4. 정렬
-    return items.sort((a, b) => {
+    return [...items].sort((a, b) => {
       const aChecked = checkedItems.includes(a.id);
       const bChecked = checkedItems.includes(b.id);
 
-      // 미체크 우선
       if (aChecked !== bChecked) {
         return aChecked ? 1 : -1;
       }
 
-      // 우선순위 높은 순
       return b.priority - a.priority;
     });
   }, [
@@ -124,6 +127,53 @@ export default function ChecklistScreen({ navigation, route }: Props) {
     selectedTags,
     currentWeek,
   ]);
+  // const filteredCategoryItems = useMemo(() => {
+  //   // 1. 카테고리 필터
+  //   let items =
+  //     categoryId === "all"
+  //       ? babyItems
+  //       : babyItems.filter(
+  //           (item) =>
+  //             item.categoryId === Number(categoryId) ||
+  //             item.category === categoryName,
+  //         );
+
+  //   // 2. 시기 필터
+  //   if (selectedFilter !== "ALL") {
+  //     items = items.filter(
+  //       (item) => getItemTimingStatus(item, currentWeek) === selectedFilter,
+  //     );
+  //   }
+
+  //   // 3. 태그 필터
+  //   // 여러 태그 선택 시 OR 조건
+  //   if (selectedTags.length > 0) {
+  //     items = items.filter((item) =>
+  //       item.tagIds?.some((tagId) => selectedTags.includes(tagId)),
+  //     );
+  //   }
+
+  //   // 4. 정렬
+  //   return items.sort((a, b) => {
+  //     const aChecked = checkedItems.includes(a.id);
+  //     const bChecked = checkedItems.includes(b.id);
+
+  //     // 미체크 우선
+  //     if (aChecked !== bChecked) {
+  //       return aChecked ? 1 : -1;
+  //     }
+
+  //     // 우선순위 높은 순
+  //     return b.priority - a.priority;
+  //   });
+  // }, [
+  //   categoryId,
+  //   categoryName,
+  //   checkedItems,
+  //   selectedFilter,
+  //   selectedTags,
+  //   currentWeek,
+  // ]);
   // 체크 토글
   // 체크 토글
   const handleToggle = async (itemId: string | number) => {
@@ -254,6 +304,12 @@ export default function ChecklistScreen({ navigation, route }: Props) {
     }
   };
 
+  const handleScrollToTop = () => {
+    scrollRef.current?.scrollTo({
+      y: 0,
+      animated: true,
+    });
+  };
   return (
     <Container edges={["top"]}>
       {/* 1. 고정 헤더 */}
@@ -269,7 +325,7 @@ export default function ChecklistScreen({ navigation, route }: Props) {
       />
 
       {/* 2. 전체 스크롤 영역 */}
-      <ScrollContent showsVerticalScrollIndicator={false}>
+      <ScrollContent ref={scrollRef} showsVerticalScrollIndicator={false}>
         {/* 진행률 카드 */}
         <ProgressCard>
           <ProgressHeader>
@@ -431,7 +487,9 @@ export default function ChecklistScreen({ navigation, route }: Props) {
 
         <BottomSpace />
       </ScrollContent>
-
+      <TopButton activeOpacity={0.8} onPress={handleScrollToTop}>
+        <Ionicons name="arrow-up" size={20} color="#FFFFFF" />
+      </TopButton>
       {/* 하단 광고 */}
       <BottomAdContainer>
         <BannerAd />
@@ -718,4 +776,26 @@ const TagText = styled.Text<{ selected: boolean }>`
 
   color: ${({ selected, theme }) =>
     selected ? "#FFFFFF" : theme.colors.textSecondary};
+`;
+const TopButton = styled.TouchableOpacity`
+  position: absolute;
+
+  right: 20px;
+  bottom: 75px;
+
+  width: 44px;
+  height: 44px;
+
+  border-radius: 22px;
+
+  background-color: ${({ theme }) => theme.colors.primary};
+
+  align-items: center;
+  justify-content: center;
+
+  elevation: 5;
+  shadow-color: #000;
+  shadow-opacity: 0.15;
+  shadow-radius: 6px;
+  shadow-offset: 0px 3px;
 `;
