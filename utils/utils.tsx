@@ -75,7 +75,7 @@ export const ITEM_ICON_MAP: Record<string, string> = {
   "아기띠 침받이": "square-outline",
   "유모차 라이너 / 쿨시트": "baby-carriage",
   "기저귀 교환매트": "human-baby-changing-table",
-  "아기 외출용 담요(블랭킷)": "bed-double-outline", // 🆕 추가
+  "아기 외출용 담요(블랭킷)": "baby-carriage",
 
   // 2. 수면 / 이불 / 의류
   아기침대: "bed-outline",
@@ -84,19 +84,18 @@ export const ITEM_ICON_MAP: Record<string, string> = {
   배냇저고리: "tshirt-crew",
   바디수트: "tshirt-v-outline",
   "신생아 옷 전반": "hanger",
-  "아기 내의(실내복)": "tshirt-crew",
-  "아기 내의/실내복": "tshirt-crew", // 🆕 추가 (이름 변형 매칭)
+  "아기 내의/실내복": "tshirt-crew",
   "외출용 겉옷(방한복)": "hanger",
   "아기이불/베개": "bed-outline",
   방수패드: "bed-outline",
   "양말/모자/손싸개": "baby-face-outline",
-  "신생아 양말": "socks", // 🆕 분리 추가
-  "신생아 모자": "hat-fedora", // 🆕 분리 추가
-  손싸개: "hand-back-left", // 🆕 분리 추가
+  "신생아 양말": "shoe-print",
+  "신생아 모자": "hat-fedora",
+  손싸개: "hand-clap",
   수면조끼: "tshirt-crew",
   침대매트: "bed-double-outline",
-  "아기 바운서": "cradle-outline", // 🆕 추가
-  "아기 모빌": "toy-brick-outline", // 🆕 추가
+  "아기 바운서": "cradle-outline",
+  "아기 모빌": "baby-face-outline",
 
   // 3. 목욕 / 위생 / 세탁
   아기욕조: "bathtub-outline",
@@ -110,15 +109,15 @@ export const ITEM_ICON_MAP: Record<string, string> = {
   "기저귀 캐디(소형 이동 바구니)": "basket-outline",
   "아기 전용 세탁바구니": "basket",
   "아기 세탁세제/빨래망": "washing-machine",
-  "아기 세탁세제": "washing-machine", // 🆕 분리 추가
+  "아기 세탁세제": "washing-machine",
   "아기 섬유유연제": "bottle-tonic-plus-outline",
-  "아기 빨래망": "washing-machine", // 🆕 분리 추가
+  "아기 빨래망": "washing-machine",
   세탁용품: "spray-bottle",
   "손·얼굴 전용 세정제": "lotion-outline",
   아기비데: "toilet",
   "아기 빗": "hair-dryer-outline",
   기저귀갈이대: "human-baby-changing-table",
-  "아기 전용 세탁기": "washing-machine", // 🆕 추가
+  "아기 전용 세탁기": "washing-machine",
 
   // 4. 건강 / 케어
   체온계: "thermometer",
@@ -130,17 +129,17 @@ export const ITEM_ICON_MAP: Record<string, string> = {
   턱받이: "baby-face-outline",
   "아기 면봉 (안전면봉/점착면봉)": "medical-cotton-swab",
   온습도계: "home-thermometer-outline",
-  "기저귀 발진 크림": "bottle-tonic-outline", // 🆕 추가
+  "기저귀 발진 크림": "bottle-tonic-outline",
 
   // 5. 수유 / 분유 / 젖병 관리
-  젖병: "baby-bottle-outline", // 🆕 추가
-  젖병소독기: "lightning-bolt-outline", // 🆕 추가
-  "젖병 건조대": "water-boiler", // 🆕 추가
-  "젖병 세척솔/젖꼭지 솔": "brush", // 🆕 추가
+  젖병: "baby-bottle-outline",
+  젖병소독기: "baby-bottle-outline",
+  "젖병 건조대": "baby-bottle-outline",
+  "젖병 세척솔/젖꼭지 솔": "baby-bottle-outline",
   "젖병 세정제": "baby-bottle-outline",
-  "분유 보관용기": "sync-alert", // 🆕 추가
-  "분유쉐이커 / 젖병 믹서": "blender-outline", // 🆕 추가
-  "젖병 보온/워머": "car-wash", // 🆕 추가
+  "분유 보관용기": "baby-bottle-outline",
+  "분유쉐이커 / 젖병 믹서": "baby-bottle-outline",
+  "젖병 보온/워머": "baby-bottle-outline",
   유축기: "baby-bottle-outline",
   수유쿠션: "baby-bottle-outline",
   수유시트: "baby-bottle-outline",
@@ -148,7 +147,7 @@ export const ITEM_ICON_MAP: Record<string, string> = {
   수유등: "lamp-outline",
   모유저장팩: "baby-bottle-outline",
   "분유 제조기 (자동)": "baby-bottle-outline",
-  수유가리개: "account-child-circle", // 🆕 추가
+  수유가리개: "account-child-circle",
 
   // 6. 산모 용품
   "회음부 관리용품": "heart-pulse",
@@ -160,27 +159,27 @@ export const ITEM_ICON_MAP: Record<string, string> = {
   "아기 퇴원복": "tshirt-crew",
   "산모용 슬리퍼": "shoe-print",
   "유두보호크림(라놀린)": "medical-bag",
-  "유두 보호 크림 / 상처 연고": "medical-bag", // 🆕 추가 (이름 변형)
+  "유두 보호 크림 / 상처 연고": "medical-bag",
   "산모용 돌기/무압박 양말": "shoe-print",
-  "수면양말 (산모용)": "shoe-print", // 🆕 이름 변형 추가
+  "수면양말 (산모용)": "shoe-print",
   수면양말: "shoe-print",
   "산후용 위생 팬티": "human-female",
   손목보호대: "bandage",
-  "손목 보호대": "bandage", // 🆕 띄어쓰기 대응
-  압박스타킹: "human-legs", // 🆕 추가
-  "산후 복대": "card-bulleted-outline", // 🆕 추가
-  "가슴 쿨링팩 / 마사지팩": "snowflake", // 🆕 추가
-  "회음부 방석 (도넛방석)": "circle-outline", // 🆕 추가
-  "개인용 좌욕 대야 (좌욕기)": "water", // 🆕 추가
+  "손목 보호대": "bandage",
+  압박스타킹: "bandage",
+  "산후 복대": "bandage",
+  "가슴 쿨링팩 / 마사지팩": "bandage",
+  "회음부 방석 (도넛방석)": "bandage",
+  "개인용 좌욕 대야 (좌욕기)": "toilet",
 
   // 7. 가전 / 가구 / 교구
   "트롤리 (아기용품 이동식 정리함)": "cart-outline",
   가습기: "air-humidifier",
   공기청정기: "air-purifier",
   "아기 병풍/사운드북": "baby-face-outline",
-  "아기 병풍": "book-open-page-variant", // 🆕 분리 추가
-  사운드북: "volume-high", // 🆕 분리 추가
-  백색소음기: "volume-medium", // 🆕 추가
+  "아기 병풍": "baby-face-outline",
+  사운드북: "baby-face-outline",
+  백색소음기: "bed-outline",
 };
 
 export function getItemIcon(title: string, category?: string | number): string {
