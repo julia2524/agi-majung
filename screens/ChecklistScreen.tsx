@@ -247,7 +247,7 @@ export default function ChecklistScreen({ navigation, route }: Props) {
   };
 
   const handleItemPress = (itemId: number) => {
-    navigation.navigate("ItemDetailScreen", { itemId });
+    navigation.navigate("ItemDetailScreen", { itemId, babyOrder });
   };
   const handleTagPress = (tagId: number) => {
     setSelectedTags((prev) => {
@@ -452,7 +452,44 @@ export default function ChecklistScreen({ navigation, route }: Props) {
                 </CardHeader>
 
                 {/* 팁 미리보기 (체크 안 된 경우에만 가독성 있게 표시) */}
-                {item.tip && !isChecked && (
+                {!isChecked && (
+                  <>
+                    {babyOrder === "secondOrMore" && item.reuseGuideNote ? (
+                      <TipBox>
+                        <TipContentRow>
+                          <TipIcon>
+                            <Ionicons
+                              name="refresh-outline"
+                              size={15}
+                              color={theme.colors.primary}
+                            />
+                          </TipIcon>
+
+                          <TipText numberOfLines={2}>
+                            {item.reuseGuideNote}
+                          </TipText>
+                        </TipContentRow>
+                      </TipBox>
+                    ) : (
+                      item.tip && (
+                        <TipBox>
+                          <TipContentRow>
+                            <TipIcon>
+                              <Ionicons
+                                name="bulb-outline"
+                                size={15}
+                                color={theme.colors.primary}
+                              />
+                            </TipIcon>
+
+                            <TipText numberOfLines={2}>{item.tip}</TipText>
+                          </TipContentRow>
+                        </TipBox>
+                      )
+                    )}
+                  </>
+                )}
+                {/* {item.tip && !isChecked && (
                   <TipBox>
                     <TipContentRow>
                       <TipIcon>
@@ -466,7 +503,7 @@ export default function ChecklistScreen({ navigation, route }: Props) {
                       <TipText numberOfLines={2}>{item.tip}</TipText>
                     </TipContentRow>
                   </TipBox>
-                )}
+                )} */}
               </ItemCard>
             );
           })}

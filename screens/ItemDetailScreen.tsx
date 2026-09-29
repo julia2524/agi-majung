@@ -64,7 +64,7 @@ const getDecisionGuide = (decision?: string) => {
   }
 };
 export default function ItemDetailScreen({ route }: Props) {
-  const { itemId } = route.params;
+  const { itemId, babyOrder } = route.params;
   const theme = useTheme();
 
   // 2. itemId를 숫자형(Number)으로 변환하여 안전하게 찾습니다.
@@ -118,7 +118,6 @@ export default function ItemDetailScreen({ route }: Props) {
             )}
           </TagRow>
         </ItemHeader>
-
         {/* 2. ✨ [NEW] 직관적인 구매 결정 가이드 카드 (최상단 강조) */}
         <DecisionCard bg={guide.bg}>
           <DecisionBadge>
@@ -130,7 +129,6 @@ export default function ItemDetailScreen({ route }: Props) {
           <DecisionTitle>{guide.title}</DecisionTitle>
           <DecisionDesc>{guide.desc}</DecisionDesc>
         </DecisionCard>
-
         {/* 3. 체크 포인트 (재사용 여부 등) */}
         <Section>
           <SectionTitle>
@@ -153,6 +151,32 @@ export default function ItemDetailScreen({ route }: Props) {
               </InfoValue>
             </InfoRow>
 
+            {/* 둘째 이상일 때 첫째 물건 재사용 가능 여부 체크 열 추가 */}
+            {babyOrder === "secondOrMore" && (
+              <>
+                <Divider />
+                <InfoRow>
+                  <InfoLabel>첫째 물건 재사용</InfoLabel>
+                  <InfoValue
+                    style={{
+                      color: item.isReusableFromFirst
+                        ? theme.colors.primary
+                        : "#EF4444",
+                    }}
+                  >
+                    {item.isReusableFromFirst === true &&
+                      "첫째 물건 물려쓰기 가능"}
+                    {item.isReusableFromFirst === false &&
+                      "둘째용 새 제품 구매 권장"}
+                    {item.isReusableFromFirst === undefined &&
+                      (item.reuseType === "NEW"
+                        ? "위생상 새 제품 구매 권장"
+                        : "보관 상태 확인 후 재사용 가능")}
+                  </InfoValue>
+                </InfoRow>
+              </>
+            )}
+
             {item.preparationPeriod && (
               <>
                 <Divider />
@@ -169,7 +193,6 @@ export default function ItemDetailScreen({ route }: Props) {
             )}
           </DescriptionCard>
         </Section>
-
         {/* 4. 알아두세요 (주의사항) */}
         {item.noticeTag && (
           <Section>
@@ -186,7 +209,6 @@ export default function ItemDetailScreen({ route }: Props) {
             </NoticeCard>
           </Section>
         )}
-
         {/* 5. 선배 맘의 실전 후기 */}
         {item.review && (
           <Section>
@@ -205,6 +227,22 @@ export default function ItemDetailScreen({ route }: Props) {
           </Section>
         )}
 
+        {babyOrder === "secondOrMore" && item.reuseGuideNote && (
+          <Section>
+            <SectionTitle>
+              <Ionicons
+                name="refresh-outline"
+                size={22}
+                color="#8B5CF6" // 둘째 전용 포인트 컬러 (예: 보라계열)
+              />
+              <SectionTitleText>둘째 이상이라면</SectionTitleText>
+            </SectionTitle>
+
+            <SecondBabyCard>
+              <TipText>{item.reuseGuideNote}</TipText>
+            </SecondBabyCard>
+          </Section>
+        )}
         {/* 6. 실전 TIP */}
         {item.tip && (
           <Section>
@@ -222,7 +260,6 @@ export default function ItemDetailScreen({ route }: Props) {
             </TipCard>
           </Section>
         )}
-
         <BottomSpace />
       </ScrollContent>
     </Container>
@@ -462,4 +499,26 @@ const EmptyText = styled.Text`
 
 const BottomSpace = styled.View`
   height: 80px;
+`;
+const SecondBabyCard = styled.View`
+  padding: 16px;
+  border-radius: 16px;
+  background-color: #f3e8ff; /* 보라 계열 연한 배경 */
+  border-width: 1px;
+  border-color: #ddd6fe;
+  margin-top: 6px;
+`;
+
+const SecondBabyBadge = styled.View`
+  align-self: flex-start;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background-color: #8b5cf6;
+  margin-bottom: 8px;
+`;
+
+const SecondBabyBadgeText = styled.Text`
+  font-size: 11px;
+  font-family: ${({ theme }) => theme.fontFamily.bold};
+  color: #ffffff;
 `;
