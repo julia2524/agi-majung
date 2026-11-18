@@ -12,7 +12,7 @@ export default function BannerAd() {
   // 테스트 모드/프로덕션 광고 단위 ID 설정
   const adUnitId = __DEV__
     ? TestIds.BANNER // "ca-app-pub-3940256099942544/6300978111" 과 동일
-    : "ca-app-pub-5145202325745375/9440073957";
+    : process.env.EXPO_PUBLIC_ADMOB_BANNER_UNIT_ID;
 
   useEffect(() => {
     mobileAds()

@@ -754,7 +754,7 @@ const MyListDesc = styled.Text`
   font-size: 12px;
   font-family: ${({ theme }) => theme.fontFamily.regular};
   color: ${({ theme }) => theme.colors.textSecondary};
-  margin-top: -20px;
+  margin-top: -13px;
 `;
 
 const BottomSpace = styled.View`

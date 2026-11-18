@@ -7,6 +7,8 @@ import PrimaryButton from "../types/design-system/ui/PrimaryButton";
 import { RootStackParamList } from "../navigation/types";
 import { saveBabyProfile } from "../storage/storage";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { theme } from "../types/design-system/theme/theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "BabyOrderScreen">;
 
@@ -49,7 +51,14 @@ export default function BabyOrderScreen({ navigation, route }: Props) {
             onPress={() => setBabyOrder("first")}
             activeOpacity={0.8}
           >
-            <OptionEmoji>👶</OptionEmoji>
+            {/* <OptionEmoji>👶</OptionEmoji> */}
+            <IconContainer>
+              <MaterialCommunityIcons
+                name="baby-bottle-outline"
+                size={25}
+                color={theme.colors.primary}
+              />
+            </IconContainer>
 
             <OptionTextContainer>
               <OptionTitle selected={babyOrder === "first"}>
@@ -71,8 +80,14 @@ export default function BabyOrderScreen({ navigation, route }: Props) {
             onPress={() => setBabyOrder("secondOrMore")}
             activeOpacity={0.8}
           >
-            <OptionEmoji>👶🏻</OptionEmoji>
-
+            {/* <OptionEmoji>👶🏻</OptionEmoji> */}
+            <IconContainer>
+              <MaterialCommunityIcons
+                name="baby-bottle-outline"
+                size={25}
+                color={theme.colors.primary}
+              />
+            </IconContainer>
             <OptionTextContainer>
               <OptionTitle selected={babyOrder === "secondOrMore"}>
                 둘째 이상
@@ -164,6 +179,16 @@ const Option = styled.TouchableOpacity<{ selected: boolean }>`
 const OptionEmoji = styled.Text`
   font-size: 34px;
   margin-right: 14px;
+`;
+
+const IconContainer = styled.View`
+  width: 42px;
+  height: 42px;
+  margin-right: 14px;
+  border-radius: 21px;
+  align-items: center;
+  justify-content: center;
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 const OptionTextContainer = styled.View`
