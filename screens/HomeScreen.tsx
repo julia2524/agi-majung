@@ -469,7 +469,7 @@ const Header = styled.View`
   min-height: 44px;
 `;
 
-const HeaderText = styled.Text`
+const HeaderText = styled(AppText)`
   flex-shrink: 1;
   font-size: ${({ theme }) => theme.typography.heading}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};

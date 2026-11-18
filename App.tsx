@@ -65,7 +65,6 @@ import { useFonts } from "expo-font";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import MobileAds from "react-native-google-mobile-ads";
 import * as SplashScreen from "expo-splash-screen";
-import { LanguageProvider } from "./context/LanguageContext";
 
 // 앱이 준비될 때까지 네이티브 Splash 화면 유지
 SplashScreen.preventAutoHideAsync();
