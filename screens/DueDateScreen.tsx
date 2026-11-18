@@ -1,34 +1,374 @@
+// import { useState } from "react";
+// import { Modal } from "react-native";
+// import styled, { useTheme } from "styled-components/native";
+// import { NativeStackScreenProps } from "@react-navigation/native-stack";
+
+// import Mascot from "../types/design-system/ui/Mascot";
+// import PrimaryButton from "../types/design-system/ui/PrimaryButton";
+// import { RootStackParamList } from "../navigation/types";
+// import CustomCalendar from "../components/CustomCalendar";
+// import { SafeAreaView } from "react-native-safe-area-context";
+
+// type Props = NativeStackScreenProps<RootStackParamList, "DueDateScreen">;
+
+// export default function DueDateScreen({ navigation }: Props) {
+//   const theme = useTheme();
+
+//   // 실제로 확정된 예정일
+//   const [dueDate, setDueDate] = useState<string | null>(null);
+
+//   // 달력에서 현재 선택하고 있는 날짜
+//   const [selectedDate, setSelectedDate] = useState<string>("");
+
+//   // 달력 Modal 표시 여부
+//   const [isPickerVisible, setPickerVisible] = useState(false);
+
+//   const todayString = new Date().toISOString().split("T")[0];
+
+//   // 날짜 박스 클릭
+//   const handleOpenCalendar = () => {
+//     // 이미 선택한 날짜가 있다면 그 날짜부터 보여주기
+//     // 없다면 오늘부터 시작
+//     setSelectedDate(dueDate ?? todayString);
+//     setPickerVisible(true);
+//   };
+
+//   // 달력에서 날짜 선택
+//   const handleSelectDate = (date: string) => {
+//     setSelectedDate(date);
+//   };
+
+//   // 취소
+//   const handleCancel = () => {
+//     setPickerVisible(false);
+//   };
+
+//   // 달력에서 선택 완료
+//   const handleConfirm = () => {
+//     if (!selectedDate) return;
+
+//     setDueDate(selectedDate);
+//     setPickerVisible(false);
+//   };
+
+//   // 다음 화면
+//   const handleNext = () => {
+//     if (!dueDate) return;
+
+//     navigation.navigate("BabyOrderScreen", {
+//       dueDate,
+//     });
+//   };
+
+//   // YYYY-MM-DD → YYYY년 M월 D일
+//   const formatDate = (dateString: string | null) => {
+//     if (!dateString) {
+//       return "날짜를 선택해주세요";
+//     }
+
+//     const [year, month, day] = dateString.split("-");
+
+//     return `${year}년 ${Number(month)}월 ${Number(day)}일`;
+//   };
+
+//   return (
+//     <Container>
+//       <Content>
+//         <MascotWrapper>
+//           <Mascot size={150} />
+//         </MascotWrapper>
+
+//         <Title>아기와 만날 날을 알려주세요</Title>
+
+//         <SubTitle>
+//           {"출산 예정일을 알려주시면\n준비할 시간을 함께 계산해드릴게요."}
+//         </SubTitle>
+
+//         <DateSection>
+//           <SectionLabel>출산 예정일</SectionLabel>
+
+//           <DateButton onPress={handleOpenCalendar}>
+//             <DateText selected={!!dueDate}>{formatDate(dueDate)}</DateText>
+
+//             <Arrow>›</Arrow>
+//           </DateButton>
+//         </DateSection>
+//       </Content>
+
+//       <ButtonContainer>
+//         <PrimaryButton title="다음" onPress={handleNext} disabled={!dueDate} />
+//       </ButtonContainer>
+
+//       {/* =========================
+//           Calendar Modal
+//       ========================= */}
+
+//       <Modal
+//         visible={isPickerVisible}
+//         transparent
+//         animationType="fade"
+//         onRequestClose={handleCancel}
+//       >
+//         <ModalOverlay>
+//           <CalendarCard>
+//             <CalendarTitle>출산 예정일을 선택해주세요</CalendarTitle>
+
+//             <CalendarWrapper>
+//               <CustomCalendar
+//                 selectedDate={selectedDate}
+//                 onSelectDate={handleSelectDate}
+//                 minDate={todayString}
+//               />
+//             </CalendarWrapper>
+
+//             <ModalButtons>
+//               <CancelButton onPress={handleCancel}>
+//                 <CancelButtonText>취소</CancelButtonText>
+//               </CancelButton>
+
+//               <ConfirmButton onPress={handleConfirm}>
+//                 <ConfirmButtonText>선택하기</ConfirmButtonText>
+//               </ConfirmButton>
+//             </ModalButtons>
+//           </CalendarCard>
+//         </ModalOverlay>
+//       </Modal>
+//     </Container>
+//   );
+// }
+
+// /* =============================
+//    Screen
+// ============================= */
+
+// const Container = styled(SafeAreaView)`
+//   flex: 1;
+//   padding: 0 24px;
+//   background-color: ${({ theme }) => theme.colors.background};
+// `;
+// const Content = styled.View`
+//   flex: 1;
+//   align-items: center;
+//   justify-content: center;
+// `;
+
+// const MascotWrapper = styled.View`
+//   margin-bottom: 20px;
+// `;
+
+// const Title = styled.Text`
+//   font-size: ${({ theme }) => theme.typography.heading}px;
+//   font-family: ${({ theme }) => theme.fontFamily.bold};
+//   color: ${({ theme }) => theme.colors.text};
+
+//   text-align: center;
+//   margin-bottom: 12px;
+// `;
+
+// const SubTitle = styled.Text`
+//   font-size: ${({ theme }) => theme.typography.button}px;
+//   font-family: ${({ theme }) => theme.fontFamily.medium};
+//   color: ${({ theme }) => theme.colors.textSecondary};
+
+//   text-align: center;
+//   line-height: 24px;
+// `;
+
+// /* =============================
+//    Date
+// ============================= */
+
+// const DateSection = styled.View`
+//   width: 100%;
+//   margin-top: 36px;
+// `;
+
+// const SectionLabel = styled.Text`
+//   font-size: ${({ theme }) => theme.typography.button}px;
+//   font-family: ${({ theme }) => theme.fontFamily.extraBold};
+//   color: ${({ theme }) => theme.colors.text};
+
+//   margin-bottom: 10px;
+//   margin-left: 4px;
+// `;
+
+// const DateButton = styled.TouchableOpacity`
+//   width: 100%;
+//   height: 58px;
+
+//   padding: 0 20px;
+
+//   border-radius: 18px;
+
+//   background-color: ${({ theme }) => theme.colors.card};
+
+//   border-width: 1px;
+//   border-color: ${({ theme }) => theme.colors.border};
+
+//   flex-direction: row;
+//   align-items: center;
+//   justify-content: space-between;
+// `;
+
+// const DateText = styled.Text<{ selected: boolean }>`
+//   font-size: ${({ theme }) => theme.typography.body}px;
+//   font-family: ${({ theme }) => theme.fontFamily.bold};
+
+//   color: ${({ theme, selected }) =>
+//     selected ? theme.colors.text : theme.colors.textSecondary};
+// `;
+
+// const Arrow = styled.Text`
+//   font-size: 30px;
+//   color: ${({ theme }) => theme.colors.textSecondary};
+// `;
+
+// /* =============================
+//    Bottom Button
+// ============================= */
+
+// const ButtonContainer = styled.View`
+//   width: 100%;
+//   padding-bottom: 12px;
+// `;
+
+// /* =============================
+//    Modal
+// ============================= */
+
+// const ModalOverlay = styled.View`
+//   flex: 1;
+
+//   background-color: rgba(0, 0, 0, 0.35);
+
+//   align-items: center;
+//   justify-content: center;
+
+//   padding: 24px;
+// `;
+
+// const CalendarCard = styled.View`
+//   width: 100%;
+
+//   padding: 20px;
+
+//   border-radius: ${({ theme }) => theme.radius.lg}px;
+
+//   background-color: ${({ theme }) => theme.colors.card};
+
+//   shadow-color: #000000;
+//   shadow-offset: 0px 6px;
+//   shadow-opacity: 0.15;
+//   shadow-radius: 16px;
+
+//   elevation: 8;
+// `;
+
+// const CalendarTitle = styled.Text`
+//   font-size: ${({ theme }) => theme.typography.subheading}px;
+//   font-family: ${({ theme }) => theme.fontFamily.bold};
+
+//   color: ${({ theme }) => theme.colors.text};
+
+//   text-align: center;
+
+//   margin-bottom: 16px;
+// `;
+
+// const CalendarWrapper = styled.View`
+//   width: 100%;
+// `;
+
+// const ModalButtons = styled.View`
+//   flex-direction: row;
+
+//   gap: 10px;
+
+//   margin-top: 16px;
+// `;
+
+// const CancelButton = styled.TouchableOpacity`
+//   flex: 1;
+
+//   height: 50px;
+
+//   border-radius: 25px;
+
+//   background-color: ${({ theme }) => theme.colors.background};
+
+//   align-items: center;
+//   justify-content: center;
+// `;
+
+// const CancelButtonText = styled.Text`
+//   font-size: ${({ theme }) => theme.typography.button}px;
+//   font-family: ${({ theme }) => theme.fontFamily.bold};
+
+//   color: ${({ theme }) => theme.colors.textSecondary};
+// `;
+
+// const ConfirmButton = styled.TouchableOpacity`
+//   flex: 1;
+
+//   height: 50px;
+
+//   border-radius: 25px;
+
+//   background-color: ${({ theme }) => theme.colors.primary};
+
+//   align-items: center;
+//   justify-content: center;
+// `;
+
+// const ConfirmButtonText = styled.Text`
+//   font-size: ${({ theme }) => theme.typography.button}px;
+//   font-family: ${({ theme }) => theme.fontFamily.bold};
+
+//   color: ${({ theme }) => theme.colors.card};
+// `;
+
 import { useState } from "react";
-import { Modal } from "react-native";
+import { Modal, ScrollView, useWindowDimensions } from "react-native";
+
 import styled, { useTheme } from "styled-components/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import Mascot from "../types/design-system/ui/Mascot";
 import PrimaryButton from "../types/design-system/ui/PrimaryButton";
 import { RootStackParamList } from "../navigation/types";
 import CustomCalendar from "../components/CustomCalendar";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { AppText } from "../utils/AppText";
 
 type Props = NativeStackScreenProps<RootStackParamList, "DueDateScreen">;
 
 export default function DueDateScreen({ navigation }: Props) {
   const theme = useTheme();
+  const { width, height } = useWindowDimensions();
 
   // 실제로 확정된 예정일
   const [dueDate, setDueDate] = useState<string | null>(null);
 
   // 달력에서 현재 선택하고 있는 날짜
-  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedDate, setSelectedDate] = useState("");
 
   // 달력 Modal 표시 여부
   const [isPickerVisible, setPickerVisible] = useState(false);
 
-  const todayString = new Date().toISOString().split("T")[0];
+  // 로컬 날짜 기준 오늘 날짜
+  const now = new Date();
+
+  const todayString = [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, "0"),
+    String(now.getDate()).padStart(2, "0"),
+  ].join("-");
+
+  // 화면 크기에 따른 마스코트 크기
+  const mascotSize = Math.min(150, Math.max(100, height * 0.19), width * 0.42);
 
   // 날짜 박스 클릭
   const handleOpenCalendar = () => {
-    // 이미 선택한 날짜가 있다면 그 날짜부터 보여주기
-    // 없다면 오늘부터 시작
     setSelectedDate(dueDate ?? todayString);
     setPickerVisible(true);
   };
@@ -73,31 +413,49 @@ export default function DueDateScreen({ navigation }: Props) {
 
   return (
     <Container>
-      <Content>
-        <MascotWrapper>
-          <Mascot size={150} />
-        </MascotWrapper>
+      {/* =========================
+          Main Content
+      ========================= */}
 
-        <Title>아기와 만날 날을 알려주세요</Title>
+      <ScreenScroll
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          flexGrow: 1,
+        }}
+      >
+        <Content>
+          <MascotWrapper>
+            <Mascot size={mascotSize} />
+          </MascotWrapper>
 
-        <SubTitle>
-          {"출산 예정일을 알려주시면\n준비할 시간을 함께 계산해드릴게요."}
-        </SubTitle>
+          <Main>
+            <Title>아기와 만날 날을 알려주세요</Title>
 
-        <DateSection>
-          <SectionLabel>출산 예정일</SectionLabel>
+            <SubTitle>
+              {"출산 예정일을 알려주시면\n준비할 시간을 함께 계산해드릴게요."}
+            </SubTitle>
+          </Main>
 
-          <DateButton onPress={handleOpenCalendar}>
-            <DateText selected={!!dueDate}>{formatDate(dueDate)}</DateText>
+          <DateSection>
+            <SectionLabel>출산 예정일</SectionLabel>
 
-            <Arrow>›</Arrow>
-          </DateButton>
-        </DateSection>
-      </Content>
+            <DateButton activeOpacity={0.75} onPress={handleOpenCalendar}>
+              <DateText selected={!!dueDate}>{formatDate(dueDate)}</DateText>
 
-      <ButtonContainer>
-        <PrimaryButton title="다음" onPress={handleNext} disabled={!dueDate} />
-      </ButtonContainer>
+              <Arrow>›</Arrow>
+            </DateButton>
+          </DateSection>
+        </Content>
+
+        {/* 하단 버튼도 스크롤 영역에 포함 */}
+        <ButtonContainer>
+          <PrimaryButton
+            title="다음"
+            onPress={handleNext}
+            disabled={!dueDate}
+          />
+        </ButtonContainer>
+      </ScreenScroll>
 
       {/* =========================
           Calendar Modal
@@ -108,25 +466,32 @@ export default function DueDateScreen({ navigation }: Props) {
         transparent
         animationType="fade"
         onRequestClose={handleCancel}
+        statusBarTranslucent
       >
         <ModalOverlay>
           <CalendarCard>
             <CalendarTitle>출산 예정일을 선택해주세요</CalendarTitle>
 
-            <CalendarWrapper>
-              <CustomCalendar
-                selectedDate={selectedDate}
-                onSelectDate={handleSelectDate}
-                minDate={todayString}
-              />
-            </CalendarWrapper>
+            {/* 달력 영역만 스크롤 가능 */}
+            <CalendarScroll
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
+              <CalendarWrapper>
+                <CustomCalendar
+                  selectedDate={selectedDate}
+                  onSelectDate={handleSelectDate}
+                  minDate={todayString}
+                />
+              </CalendarWrapper>
+            </CalendarScroll>
 
             <ModalButtons>
-              <CancelButton onPress={handleCancel}>
+              <CancelButton activeOpacity={0.75} onPress={handleCancel}>
                 <CancelButtonText>취소</CancelButtonText>
               </CancelButton>
 
-              <ConfirmButton onPress={handleConfirm}>
+              <ConfirmButton activeOpacity={0.75} onPress={handleConfirm}>
                 <ConfirmButtonText>선택하기</ConfirmButtonText>
               </ConfirmButton>
             </ModalButtons>
@@ -143,35 +508,50 @@ export default function DueDateScreen({ navigation }: Props) {
 
 const Container = styled(SafeAreaView)`
   flex: 1;
-  padding: 0 24px;
   background-color: ${({ theme }) => theme.colors.background};
 `;
-const Content = styled.View`
+
+const ScreenScroll = styled.ScrollView.attrs({
+  contentContainerStyle: {
+    flexGrow: 1,
+  },
+})`
   flex: 1;
+`;
+
+const Content = styled.View`
+  flex-grow: 1;
   align-items: center;
   justify-content: center;
+  padding: 24px 24px 20px;
 `;
 
 const MascotWrapper = styled.View`
   margin-bottom: 20px;
 `;
 
-const Title = styled.Text`
+const Main = styled.View`
+  width: 100%;
+  align-items: center;
+`;
+
+const Title = styled(AppText)`
+  width: 100%;
   font-size: ${({ theme }) => theme.typography.heading}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ theme }) => theme.colors.text};
-
   text-align: center;
+  line-height: ${({ theme }) => theme.typography.heading * 1.4}px;
   margin-bottom: 12px;
 `;
 
-const SubTitle = styled.Text`
+const SubTitle = styled(AppText)`
+  width: 100%;
   font-size: ${({ theme }) => theme.typography.button}px;
   font-family: ${({ theme }) => theme.fontFamily.medium};
   color: ${({ theme }) => theme.colors.textSecondary};
-
   text-align: center;
-  line-height: 24px;
+  line-height: 1.5em;
 `;
 
 /* =============================
@@ -183,25 +563,20 @@ const DateSection = styled.View`
   margin-top: 36px;
 `;
 
-const SectionLabel = styled.Text`
+const SectionLabel = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.button}px;
   font-family: ${({ theme }) => theme.fontFamily.extraBold};
   color: ${({ theme }) => theme.colors.text};
-
   margin-bottom: 10px;
   margin-left: 4px;
 `;
 
 const DateButton = styled.TouchableOpacity`
   width: 100%;
-  height: 58px;
-
-  padding: 0 20px;
-
+  min-height: 58px;
+  padding: 12px 20px;
   border-radius: 18px;
-
   background-color: ${({ theme }) => theme.colors.card};
-
   border-width: 1px;
   border-color: ${({ theme }) => theme.colors.border};
 
@@ -210,17 +585,24 @@ const DateButton = styled.TouchableOpacity`
   justify-content: space-between;
 `;
 
-const DateText = styled.Text<{ selected: boolean }>`
+const DateText = styled(AppText)<{ selected: boolean }>`
+  flex: 1;
+  flex-shrink: 1;
+
   font-size: ${({ theme }) => theme.typography.body}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
 
   color: ${({ theme, selected }) =>
     selected ? theme.colors.text : theme.colors.textSecondary};
+
+  text-align: left;
+  line-height: 1.4em;
 `;
 
-const Arrow = styled.Text`
+const Arrow = styled(AppText)`
   font-size: 30px;
   color: ${({ theme }) => theme.colors.textSecondary};
+  margin-left: 12px;
 `;
 
 /* =============================
@@ -229,7 +611,7 @@ const Arrow = styled.Text`
 
 const ButtonContainer = styled.View`
   width: 100%;
-  padding-bottom: 12px;
+  padding: 12px 24px 17px;
 `;
 
 /* =============================
@@ -238,41 +620,40 @@ const ButtonContainer = styled.View`
 
 const ModalOverlay = styled.View`
   flex: 1;
-
   background-color: rgba(0, 0, 0, 0.35);
-
   align-items: center;
   justify-content: center;
-
   padding: 24px;
 `;
 
 const CalendarCard = styled.View`
   width: 100%;
+  max-height: 90%;
+  flex-shrink: 1;
 
   padding: 20px;
-
   border-radius: ${({ theme }) => theme.radius.lg}px;
-
   background-color: ${({ theme }) => theme.colors.card};
 
   shadow-color: #000000;
   shadow-offset: 0px 6px;
   shadow-opacity: 0.15;
   shadow-radius: 16px;
-
   elevation: 8;
 `;
 
-const CalendarTitle = styled.Text`
+const CalendarTitle = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.subheading}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
-
   color: ${({ theme }) => theme.colors.text};
-
   text-align: center;
-
+  line-height: 1.4em;
   margin-bottom: 16px;
+`;
+
+const CalendarScroll = styled.ScrollView`
+  flex-shrink: 1;
+  min-height: 0;
 `;
 
 const CalendarWrapper = styled.View`
@@ -281,48 +662,41 @@ const CalendarWrapper = styled.View`
 
 const ModalButtons = styled.View`
   flex-direction: row;
-
-  gap: 10px;
-
   margin-top: 16px;
 `;
 
 const CancelButton = styled.TouchableOpacity`
   flex: 1;
-
-  height: 50px;
-
+  min-height: 50px;
+  padding: 10px 8px;
   border-radius: 25px;
-
   background-color: ${({ theme }) => theme.colors.background};
-
   align-items: center;
   justify-content: center;
+  margin-right: 5px;
 `;
 
-const CancelButtonText = styled.Text`
+const CancelButtonText = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.button}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
-
   color: ${({ theme }) => theme.colors.textSecondary};
+  text-align: center;
 `;
 
 const ConfirmButton = styled.TouchableOpacity`
   flex: 1;
-
-  height: 50px;
-
+  min-height: 50px;
+  padding: 10px 8px;
   border-radius: 25px;
-
   background-color: ${({ theme }) => theme.colors.primary};
-
   align-items: center;
   justify-content: center;
+  margin-left: 5px;
 `;
 
-const ConfirmButtonText = styled.Text`
+const ConfirmButtonText = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.button}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
-
   color: ${({ theme }) => theme.colors.card};
+  text-align: center;
 `;

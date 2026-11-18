@@ -31,6 +31,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     favicon: "./assets/favicon.png",
   },
   plugins: [
+    "expo-localization",
     "expo-font",
     "@react-native-community/datetimepicker",
     [
@@ -38,6 +39,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       {
         // 💡 .env 파일의 광고 ID를 동적으로 호출
         androidAppId: process.env.EXPO_PUBLIC_ADMOB_APP_ID,
+        iosAppId: "ca-app-pub-3940256099942544~1458002511",
       },
     ],
   ],
