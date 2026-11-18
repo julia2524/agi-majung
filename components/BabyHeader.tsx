@@ -2,6 +2,7 @@ import React from "react";
 import styled, { useTheme } from "styled-components/native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { AppText } from "../utils/AppText";
 
 interface HeaderProps {
   title?: string;
@@ -90,7 +91,7 @@ const TitleWrapper = styled.View`
   align-items: center;
 `;
 
-const NavTitle = styled.Text`
+const NavTitle = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.subheading}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ theme }) => theme.colors.text};
