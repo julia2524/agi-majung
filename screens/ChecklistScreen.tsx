@@ -12,7 +12,8 @@ import BannerAd from "../services/BannerAd";
 import { BabyItem } from "../types/baby";
 import { getItemTimingStatus, ItemTimingStatus } from "../utils/itemTiming";
 import { GlossyDot } from "../components/GlossyDot/GlossyDot";
-import { ScrollView } from "react-native";
+import { ScrollView, useWindowDimensions } from "react-native";
+import { AppText } from "../utils/AppText";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ChecklistScreen">;
 type FilterType = "ALL" | "NOW" | "UPCOMING" | "URGENT";
@@ -32,6 +33,9 @@ const TAGS: { id: number; name: string }[] = [
 ];
 
 export default function ChecklistScreen({ navigation, route }: Props) {
+  const { width, fontScale } = useWindowDimensions();
+
+  const isCompactFilter = width < 360 || fontScale >= 1.3;
   const theme = useTheme();
   const scrollRef = useRef<ScrollView>(null);
   const { categoryId, categoryName, dueDate, babyOrder, initialFilter } =
@@ -127,55 +131,7 @@ export default function ChecklistScreen({ navigation, route }: Props) {
     selectedTags,
     currentWeek,
   ]);
-  // const filteredCategoryItems = useMemo(() => {
-  //   // 1. 카테고리 필터
-  //   let items =
-  //     categoryId === "all"
-  //       ? babyItems
-  //       : babyItems.filter(
-  //           (item) =>
-  //             item.categoryId === Number(categoryId) ||
-  //             item.category === categoryName,
-  //         );
 
-  //   // 2. 시기 필터
-  //   if (selectedFilter !== "ALL") {
-  //     items = items.filter(
-  //       (item) => getItemTimingStatus(item, currentWeek) === selectedFilter,
-  //     );
-  //   }
-
-  //   // 3. 태그 필터
-  //   // 여러 태그 선택 시 OR 조건
-  //   if (selectedTags.length > 0) {
-  //     items = items.filter((item) =>
-  //       item.tagIds?.some((tagId) => selectedTags.includes(tagId)),
-  //     );
-  //   }
-
-  //   // 4. 정렬
-  //   return items.sort((a, b) => {
-  //     const aChecked = checkedItems.includes(a.id);
-  //     const bChecked = checkedItems.includes(b.id);
-
-  //     // 미체크 우선
-  //     if (aChecked !== bChecked) {
-  //       return aChecked ? 1 : -1;
-  //     }
-
-  //     // 우선순위 높은 순
-  //     return b.priority - a.priority;
-  //   });
-  // }, [
-  //   categoryId,
-  //   categoryName,
-  //   checkedItems,
-  //   selectedFilter,
-  //   selectedTags,
-  //   currentWeek,
-  // ]);
-  // 체크 토글
-  // 체크 토글
   const handleToggle = async (itemId: string | number) => {
     const savedItems = await getCheckedItems();
 
@@ -340,8 +296,9 @@ export default function ChecklistScreen({ navigation, route }: Props) {
         </ProgressCard>
 
         {/* 시기 필터 탭 */}
-        <FilterContainer>
+        <FilterContainer compact={isCompactFilter}>
           <FilterTab
+            compact={isCompactFilter}
             active={selectedFilter === "ALL"}
             onPress={() => setSelectedFilter("ALL")}
           >
@@ -350,16 +307,18 @@ export default function ChecklistScreen({ navigation, route }: Props) {
             </FilterTabText>
           </FilterTab>
           <FilterTab
+            compact={isCompactFilter}
             active={selectedFilter === "URGENT"}
             onPress={() => setSelectedFilter("URGENT")}
           >
             <GlossyDot type="red" size={14} />
             <FilterTabText active={selectedFilter === "URGENT"}>
-              이제 서둘러요
+              서둘러 준비
             </FilterTabText>
           </FilterTab>
 
           <FilterTab
+            compact={isCompactFilter}
             active={selectedFilter === "NOW"}
             onPress={() => setSelectedFilter("NOW")}
           >
@@ -370,6 +329,7 @@ export default function ChecklistScreen({ navigation, route }: Props) {
           </FilterTab>
 
           <FilterTab
+            compact={isCompactFilter}
             active={selectedFilter === "UPCOMING"}
             onPress={() => setSelectedFilter("UPCOMING")}
           >
@@ -565,13 +525,13 @@ const ProgressHeader = styled.View`
   margin-bottom: 8px;
 `;
 
-const ProgressTitle = styled.Text`
+const ProgressTitle = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.button}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ theme }) => theme.colors.text};
 `;
 
-const ProgressCount = styled.Text`
+const ProgressCount = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.small}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ theme }) => theme.colors.primary};
@@ -592,33 +552,67 @@ const ProgressFill = styled.View<{ progress: number }>`
   background-color: ${({ theme }) => theme.colors.primary};
 `;
 
-const FilterContainer = styled.View`
+// const FilterContainer = styled.View`
+//   flex-direction: row;
+//   margin-top: 16px;
+//   gap: 6px;
+// `;
+const FilterContainer = styled.View<{ compact: boolean }>`
   flex-direction: row;
+  flex-wrap: ${({ compact }) => (compact ? "wrap" : "nowrap")};
   margin-top: 16px;
-  gap: 6px;
+  gap: 8px;
 `;
-
-const FilterTab = styled.TouchableOpacity<{ active: boolean }>`
-  flex: 1;
-  padding-vertical: 8px;
+const FilterTab = styled.TouchableOpacity<{
+  active: boolean;
+  compact: boolean;
+}>`
+  flex: ${({ compact }) => (compact ? "0 0 47%" : "1")};
+  min-height: 44px;
+  padding: 8px 6px;
   border-radius: 20px;
   align-items: center;
   justify-content: center;
   gap: 4px;
   flex-direction: row;
+
   background-color: ${({ active, theme }) =>
     active ? theme.colors.primary : theme.colors.card};
+
   border-width: 1px;
   border-color: ${({ active, theme }) =>
     active ? theme.colors.primary : theme.colors.border};
 `;
-
-const FilterTabText = styled.Text<{ active: boolean }>`
+const FilterTabText = styled(AppText)<{ active: boolean }>`
+  flex-shrink: 1;
+  text-align: center;
   font-size: 11px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ active, theme }) =>
     active ? "#FFFFFF" : theme.colors.textSecondary};
 `;
+
+// const FilterTab = styled.TouchableOpacity<{ active: boolean }>`
+//   flex: 1;
+//   padding-vertical: 8px;
+//   border-radius: 20px;
+//   align-items: center;
+//   justify-content: center;
+//   gap: 4px;
+//   flex-direction: row;
+//   background-color: ${({ active, theme }) =>
+//     active ? theme.colors.primary : theme.colors.card};
+//   border-width: 1px;
+//   border-color: ${({ active, theme }) =>
+//     active ? theme.colors.primary : theme.colors.border};
+// `;
+
+// const FilterTabText = styled(AppText)<{ active: boolean }>`
+//   font-size: 11px;
+//   font-family: ${({ theme }) => theme.fontFamily.bold};
+//   color: ${({ active, theme }) =>
+//     active ? "#FFFFFF" : theme.colors.textSecondary};
+// `;
 
 const ItemList = styled.View`
   margin-top: 16px;
@@ -674,7 +668,7 @@ const TitleRow = styled.View`
   gap: 6px;
 `;
 
-const ItemName = styled.Text<{ checked: boolean }>`
+const ItemName = styled(AppText)<{ checked: boolean }>`
   font-size: ${({ theme }) => theme.typography.body}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ theme, checked }) =>
@@ -682,7 +676,7 @@ const ItemName = styled.Text<{ checked: boolean }>`
   text-decoration-line: ${({ checked }) => (checked ? "line-through" : "none")};
 `;
 
-const QuantityText = styled.Text`
+const QuantityText = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.small}px;
   font-family: ${({ theme }) => theme.fontFamily.regular};
   color: ${({ theme }) => theme.colors.textSecondary};
@@ -702,7 +696,7 @@ const Badge = styled.View<{ bg: string }>`
   gap: 4px;
 `;
 
-const BadgeText = styled.Text<{ color: string }>`
+const BadgeText = styled(AppText)<{ color: string }>`
   font-size: 10px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ color }) => color};
@@ -733,7 +727,7 @@ const TipIcon = styled.View`
   align-items: center;
 `;
 
-const TipText = styled.Text`
+const TipText = styled(AppText)`
   flex: 1;
 
   font-size: ${({ theme }) => theme.typography.tiny}px;
@@ -751,7 +745,7 @@ const EmptyContainer = styled.View`
   padding: 50px 20px;
 `;
 
-const EmptyEmoji = styled.Text`
+const EmptyEmoji = styled(AppText)`
   font-size: 42px;
   margin-bottom: 12px;
 `;
@@ -760,7 +754,7 @@ const EmptyIconWrapper = styled.View`
   opacity: 0.7;
 `;
 
-const EmptyText = styled.Text`
+const EmptyText = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.body}px;
   font-family: ${({ theme }) => theme.fontFamily.medium};
   color: ${({ theme }) => theme.colors.textSecondary};
@@ -806,7 +800,7 @@ const TagButton = styled.TouchableOpacity<{
     selected ? theme.colors.primary : theme.colors.border};
 `;
 
-const TagText = styled.Text<{ selected: boolean }>`
+const TagText = styled(AppText)<{ selected: boolean }>`
   font-size: 11px;
 
   font-family: ${({ theme }) => theme.fontFamily.bold};
