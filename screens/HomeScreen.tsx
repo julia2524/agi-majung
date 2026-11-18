@@ -22,6 +22,8 @@ import { babyItems } from "../data/babyItems";
 import BannerAd from "../services/BannerAd";
 import { calculateUrgency, getItemTimingStatus } from "../utils/itemTiming";
 import { GlossyDot } from "../components/GlossyDot/GlossyDot";
+import { useWindowDimensions } from "react-native";
+import { AppText } from "../utils/AppText";
 
 type Props = NativeStackScreenProps<RootStackParamList, "HomeScreen">;
 
@@ -48,6 +50,18 @@ function formatDDay(dDay: number): string {
 }
 
 export default function HomeScreen({ navigation, route }: Props) {
+  const { width: windowWidth, fontScale } = useWindowDimensions();
+
+  // 디스플레이 크기를 최대로 했을 때도
+  // 기존 3열 디자인을 최대한 유지하고,
+  // 정말 좁은 화면에서만 2열로 전환
+  const categoryColumns = windowWidth < 330 ? 2 : 3;
+
+  // 시스템 글자 크기 확대 여부
+  const isLargeText = fontScale >= 1.3;
+
+  // 마스코트는 좁은 화면과 큰 글자 환경에서 조금 작게
+  const mascotSize = isLargeText || windowWidth < 360 ? 64 : 80;
   const theme = useTheme();
   const { dueDate, babyOrder } = route.params;
   const [myItems, setMyItems] = useState<MyItem[]>([]);
@@ -203,7 +217,14 @@ export default function HomeScreen({ navigation, route }: Props) {
 
   return (
     <Container>
-      <ScrollContent showsVerticalScrollIndicator={false}>
+      <ScrollContent
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingTop: 16,
+          paddingBottom: 24,
+        }}
+      >
         {/* ========== 헤더 (최소화) ========== */}
         <Header>
           <HeaderText>아기마중</HeaderText>
@@ -233,8 +254,9 @@ export default function HomeScreen({ navigation, route }: Props) {
           }
         >
           <MascotContainer>
-            <Mascot size={80} />
+            <Mascot size={mascotSize} />
           </MascotContainer>
+
           {/* 1. 상단: D-Day 배지 & 마스코트 */}
           <HeroTop>
             <HeroBadge>
@@ -320,7 +342,6 @@ export default function HomeScreen({ navigation, route }: Props) {
         <SectionHeader>
           <SectionTitle>카테고리별로 보기</SectionTitle>
         </SectionHeader>
-
         <CategoryGrid>
           {categories.map(({ id, name, Icon }) => {
             const prog = categoryProgressMap[id] || {
@@ -328,6 +349,7 @@ export default function HomeScreen({ navigation, route }: Props) {
               checked: 0,
               percent: 0,
             };
+
             const isAllDone = prog.total > 0 && prog.checked === prog.total;
 
             return (
@@ -347,12 +369,14 @@ export default function HomeScreen({ navigation, route }: Props) {
                 )}
 
                 <Icon size={34} />
+
                 <CategoryName>{name}</CategoryName>
 
                 <CategoryProgressWrapper>
                   <CategoryProgressBar>
                     <CategoryProgressFill progress={prog.percent} />
                   </CategoryProgressBar>
+
                   <CategoryCountText>
                     {prog.checked}/{prog.total}
                   </CategoryCountText>
@@ -360,6 +384,7 @@ export default function HomeScreen({ navigation, route }: Props) {
               </CategoryCard>
             );
           })}
+
           <CategoryCard
             activeOpacity={0.7}
             onPress={() => navigation.navigate("MyItemScreen")}
@@ -434,118 +459,128 @@ const Container = styled.View`
 
 const ScrollContent = styled.ScrollView`
   flex: 1;
-  padding: 16px 20px;
 `;
 
-/* 헤더 */
 const Header = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  min-height: 44px;
 `;
 
 const HeaderText = styled.Text`
+  flex-shrink: 1;
   font-size: ${({ theme }) => theme.typography.heading}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ theme }) => theme.colors.text};
 `;
 
 const SettingsButton = styled.TouchableOpacity`
-  padding: 6px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px;
+  align-items: center;
+  justify-content: center;
 `;
 
-/* 히어로 카드 - 가장 중요 */
 const HeroCard = styled.TouchableOpacity`
   background-color: ${({ theme }) => theme.colors.primary};
   border-radius: 24px;
   padding: 20px;
   margin-bottom: 14px;
   position: relative;
+  overflow: hidden;
 `;
 
 const MascotContainer = styled.View`
   position: absolute;
-  right: 15px;
-  top: 15px;
+  right: 12px;
+  top: 12px;
+  opacity: 0.95;
 `;
+
 const HeroTop = styled.View`
   flex-direction: row;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px; /* 마스코트와 문구 사이 여백 조절 */
+  align-items: flex-start;
+  margin-bottom: 12px;
+  padding-right: 64px;
 `;
 
-/* 반투명 흰색으로 은은하고 세련된 D-Day 배지 */
 const HeroBadge = styled.View`
   background-color: rgba(255, 255, 255, 0.25);
-  padding: 4px 10px;
+  padding: 6px 12px;
   border-radius: 12px;
   align-self: flex-start;
 `;
 
-const HeroBadgeText = styled.Text`
+const HeroBadgeText = styled(AppText)`
   font-size: 12px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: #ffffff;
-  include-font-padding: false;
+  flex-shrink: 1;
 `;
 
-const HeroDesc = styled.Text`
+const HeroDesc = styled(AppText)`
   font-size: 14px;
   font-family: ${({ theme }) => theme.fontFamily.medium};
   color: rgba(255, 255, 255, 0.95);
   line-height: 20px;
   margin-bottom: 12px;
+  padding-right: 48px;
+  flex-shrink: 1;
 `;
 
-/* 하단 수량 + 버튼 한 줄 정렬 컨테이너 */
-/* 3. 하단 수량 + 버튼 컨테이너: align-items: center 로 수직 중앙 정렬 */
 const HeroBottomRow = styled.View`
   flex-direction: row;
   justify-content: space-between;
-  align-items: center; /* 💡 flex-end 대신 center로 변경하여 수직 중앙 정렬 */
-  margin-top: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 10px;
+  column-gap: 8px;
+  margin-top: 4px;
 `;
 
 const HeroCountGroup = styled.View`
   flex-direction: row;
-  align-items: baseline; /* 💡 '31'과 '개'의 텍스트 밑선을 맞춤 */
+  align-items: baseline;
+  flex-shrink: 1;
 `;
 
-const HeroCount = styled.Text`
+const HeroCount = styled(AppText)`
   font-size: 40px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: #ffffff;
-  line-height: 44px;
-  include-font-padding: false; /* 💡 텍스트 내부 상하 여백 제거 */
+  flex-shrink: 1;
 `;
 
-const HeroCountUnit = styled.Text`
+const HeroCountUnit = styled(AppText)`
   font-size: 18px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: #ffffff;
   margin-left: 3px;
-  include-font-padding: false;
 `;
 
 const HeroButton = styled.View`
   flex-direction: row;
   align-items: center;
+  justify-content: center;
   background-color: rgba(255, 255, 255, 0.22);
-  padding: 8px 14px;
+  padding: 10px 14px;
   border-radius: 20px;
+  flex-shrink: 1;
   gap: 4px;
 `;
 
-const HeroButtonText = styled.Text`
+const HeroButtonText = styled(AppText)`
   font-size: 12px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: #ffffff;
-  include-font-padding: false;
+  flex-shrink: 1;
+  text-align: center;
 `;
 
-/* 진행률 카드 */
 const ProgressCard = styled.TouchableOpacity`
   background-color: ${({ theme }) => theme.colors.card};
   border-radius: 18px;
@@ -559,19 +594,44 @@ const ProgressTop = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  flex-wrap: wrap;
+  row-gap: 6px;
+  column-gap: 8px;
+  margin-bottom: 12px;
 `;
 
-const ProgressLabel = styled.Text`
+const ProgressLabel = styled(AppText)`
+  flex-shrink: 1;
   font-size: 14px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ theme }) => theme.colors.text};
 `;
 
-const ProgressPercent = styled.Text`
+const ProgressPercent = styled(AppText)`
   font-size: 18px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ theme }) => theme.colors.primary};
+  flex-shrink: 0;
+`;
+
+const ProgressBottom = styled.View`
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+`;
+
+const ProgressCount = styled(AppText)`
+  font-size: 13px;
+  font-family: ${({ theme }) => theme.fontFamily.bold};
+  color: ${({ theme }) => theme.colors.text};
+  flex-shrink: 1;
+`;
+
+const ProgressTotal = styled(AppText)`
+  font-size: 13px;
+  font-family: ${({ theme }) => theme.fontFamily.regular};
+  color: ${({ theme }) => theme.colors.textSecondary};
+  margin-left: 2px;
 `;
 
 const ProgressBar = styled.View`
@@ -583,31 +643,12 @@ const ProgressBar = styled.View`
 `;
 
 const ProgressFill = styled.View<{ progress: number }>`
-  width: ${({ progress }) => `${Math.max(progress, 0)}%`};
+  width: ${({ progress }) => `${Math.max(0, Math.min(progress, 100))}%`};
   height: 100%;
   border-radius: 4px;
   background-color: ${({ theme }) => theme.colors.primary};
 `;
 
-const ProgressBottom = styled.View`
-  flex-direction: row;
-  align-items: center;
-`;
-
-const ProgressCount = styled.Text`
-  font-size: 13px;
-  font-family: ${({ theme }) => theme.fontFamily.bold};
-  color: ${({ theme }) => theme.colors.text};
-`;
-
-const ProgressTotal = styled.Text`
-  font-size: 13px;
-  font-family: ${({ theme }) => theme.fontFamily.regular};
-  color: ${({ theme }) => theme.colors.textSecondary};
-  margin-left: 2px;
-`;
-
-/* 아직 괜찮은 카드 */
 const LaterCard = styled.TouchableOpacity`
   flex-direction: row;
   align-items: center;
@@ -618,47 +659,40 @@ const LaterCard = styled.TouchableOpacity`
   border-width: 1px;
   border-color: ${({ theme }) => theme.colors.border};
   margin-bottom: 24px;
+  min-height: 54px;
 `;
 
 const LaterLeft = styled.View`
   flex-direction: row;
   align-items: center;
   flex: 1;
-`;
-const StatusDot = styled.View<{ color: string }>`
-  width: 15px;
-  height: 15px;
-  border-radius: 7.5px;
-  background-color: ${({ color }) => color};
-  margin-right: 8px;
-`;
-const LaterEmoji = styled.Text`
-  font-size: 16px;
-  margin-right: 8px;
+  min-width: 0px;
 `;
 
-const LaterText = styled.Text`
+const LaterText = styled(AppText)`
   font-size: 13px;
   font-family: ${({ theme }) => theme.fontFamily.medium};
   color: ${({ theme }) => theme.colors.text};
   flex: 1;
+  flex-shrink: 1;
 `;
 
-const LaterCount = styled.Text`
+const LaterCount = styled(AppText)`
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ theme }) => theme.colors.primary};
 `;
 
-/* 섹션 헤더 */
-const SectionHeader = styled.View``;
+const SectionHeader = styled.View`
+  margin-bottom: 12px;
+`;
 
-const SectionTitle = styled.Text`
+const SectionTitle = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.body}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ theme }) => theme.colors.text};
+  flex-shrink: 1;
 `;
 
-/* 카테고리 그리드 */
 const CategoryGrid = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
@@ -666,7 +700,6 @@ const CategoryGrid = styled.View`
   row-gap: 10px;
   margin-bottom: 16px;
 `;
-
 const CategoryCard = styled.TouchableOpacity`
   width: 31%;
   position: relative;
@@ -678,20 +711,29 @@ const CategoryCard = styled.TouchableOpacity`
   border-color: ${({ theme }) => theme.colors.border};
 `;
 
-const DoneBadge = styled.View`
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  z-index: 1;
-`;
-
-const CategoryName = styled.Text`
+const CategoryName = styled(AppText)`
+  width: 100%;
   margin-top: 6px;
   margin-bottom: 8px;
   font-size: 12px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ theme }) => theme.colors.text};
   text-align: center;
+  flex-shrink: 1;
+`;
+
+const CategoryCountText = styled(AppText)`
+  font-size: 10px;
+  font-family: ${({ theme }) => theme.fontFamily.regular};
+  color: ${({ theme }) => theme.colors.textSecondary};
+  margin-top: 3px;
+  flex-shrink: 1;
+`;
+const DoneBadge = styled.View`
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
 `;
 
 const CategoryProgressWrapper = styled.View`
@@ -701,64 +743,61 @@ const CategoryProgressWrapper = styled.View`
 
 const CategoryProgressBar = styled.View`
   width: 70%;
-  height: 3px;
+  height: 4px;
   border-radius: 2px;
   background-color: ${({ theme }) => theme.colors.border};
   overflow: hidden;
 `;
 
 const CategoryProgressFill = styled.View<{ progress: number }>`
-  width: ${({ progress }) => `${progress}%`};
+  width: ${({ progress }) => `${Math.max(0, Math.min(progress, 100))}%`};
   height: 100%;
   border-radius: 2px;
   background-color: ${({ theme }) => theme.colors.primary};
 `;
 
-const CategoryCountText = styled.Text`
-  font-size: 10px;
-  font-family: ${({ theme }) => theme.fontFamily.regular};
-  color: ${({ theme }) => theme.colors.textSecondary};
-  margin-top: 3px;
+const MyListTitle = styled(AppText)`
+  font-size: 14px;
+  font-family: ${({ theme }) => theme.fontFamily.bold};
+  color: ${({ theme }) => theme.colors.text};
+  flex-shrink: 1;
 `;
 
-/* 나만의 리스트 */
+const MyListDesc = styled(AppText)`
+  font-size: 12px;
+  font-family: ${({ theme }) => theme.fontFamily.regular};
+  color: ${({ theme }) => theme.colors.textSecondary};
+  margin-top: -13px;
+  flex-shrink: 1;
+`;
+
 const MyListCard = styled.TouchableOpacity`
   flex-direction: row;
   align-items: center;
   background-color: ${({ theme }) => theme.colors.secondary};
   border-radius: 16px;
   padding: 14px 16px;
+  min-height: 68px;
+`;
+
+const MyListContent = styled.View`
+  flex: 1;
+  min-width: 0px;
 `;
 
 const MyListIcon = styled.View`
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 12px;
   background-color: ${({ theme }) => theme.colors.background};
   align-items: center;
   justify-content: center;
   margin-right: 12px;
-`;
-
-const MyListContent = styled.View`
-  flex: 1;
-`;
-
-const MyListTitle = styled.Text`
-  font-size: 14px;
-  font-family: ${({ theme }) => theme.fontFamily.bold};
-  color: ${({ theme }) => theme.colors.text};
-`;
-
-const MyListDesc = styled.Text`
-  font-size: 12px;
-  font-family: ${({ theme }) => theme.fontFamily.regular};
-  color: ${({ theme }) => theme.colors.textSecondary};
-  margin-top: -13px;
+  flex-shrink: 0;
 `;
 
 const BottomSpace = styled.View`
-  height: 40px;
+  height: 24px;
 `;
 
 const BottomAdContainer = styled.View`
