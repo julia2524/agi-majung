@@ -10,6 +10,7 @@ import { babyItems } from "../data/babyItems";
 import { getItemIcon, getPriorityText } from "../utils/utils";
 import { getPreparationPeriodText } from "../utils/itemTiming";
 import { GlossyDot } from "../components/GlossyDot/GlossyDot";
+import { AppText } from "../utils/AppText";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ItemDetailScreen">;
 
@@ -298,7 +299,7 @@ const ItemIcon = styled.View`
   border-color: ${({ theme }) => theme.colors.border};
 `;
 
-const ItemName = styled.Text`
+const ItemName = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.heading}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ theme }) => theme.colors.text};
@@ -326,13 +327,13 @@ const QuantityTag = styled.View`
   border-color: ${({ theme }) => theme.colors.border};
 `;
 
-const TagText = styled.Text`
+const TagText = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.small}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: #ffffff;
 `;
 
-const QuantityTagText = styled.Text`
+const QuantityTagText = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.small}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ theme }) => theme.colors.textSecondary};
@@ -355,21 +356,21 @@ const DecisionBadge = styled.View`
   margin-bottom: -8px;
 `;
 
-const DecisionBadgeText = styled.Text<{ color: string }>`
+const DecisionBadgeText = styled(AppText)<{ color: string }>`
   font-size: 12px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ color }) => color};
   include-font-padding: false;
 `;
 
-const DecisionTitle = styled.Text`
+const DecisionTitle = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.subheading}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: #1e293b;
   margin-bottom: -4px;
 `;
 
-const DecisionDesc = styled.Text`
+const DecisionDesc = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.small}px;
   font-family: ${({ theme }) => theme.fontFamily.medium};
   color: #475569;
@@ -386,7 +387,7 @@ const SectionTitle = styled.View`
   gap: 6px;
 `;
 
-const SectionTitleText = styled.Text`
+const SectionTitleText = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.button}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: ${({ theme }) => theme.colors.text};
@@ -406,13 +407,13 @@ const InfoRow = styled.View`
   justify-content: space-between;
 `;
 
-const InfoLabel = styled.Text`
+const InfoLabel = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.small}px;
   font-family: ${({ theme }) => theme.fontFamily.medium};
   color: ${({ theme }) => theme.colors.textSecondary};
 `;
 
-const InfoValue = styled.Text`
+const InfoValue = styled(AppText)`
   flex: 1;
   margin-left: 16px;
   text-align: right;
@@ -435,7 +436,7 @@ const NoticeCard = styled.View`
   border-color: ${({ theme }) => theme.colors.border};
 `;
 
-const NoticeText = styled.Text`
+const NoticeText = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.small}px;
   font-family: ${({ theme }) => theme.fontFamily.medium};
   line-height: 20px;
@@ -450,7 +451,7 @@ const ReviewCard = styled.View`
   border-color: #e2e8f0;
 `;
 
-const ReviewText = styled.Text`
+const ReviewText = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.small}px;
   font-family: ${({ theme }) => theme.fontFamily.regular};
   line-height: 20px;
@@ -464,7 +465,7 @@ const TipCard = styled.View`
   background-color: ${({ theme }) => theme.colors.secondary};
 `;
 
-const TipText = styled.Text`
+const TipText = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.small}px;
   font-family: ${({ theme }) => theme.fontFamily.medium};
   line-height: 20px;
@@ -490,7 +491,7 @@ const EmptyIconWrapper = styled.View`
   margin-bottom: 12px;
 `;
 
-const EmptyText = styled.Text`
+const EmptyText = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.body}px;
   font-family: ${({ theme }) => theme.fontFamily.medium};
   color: ${({ theme }) => theme.colors.textSecondary};
@@ -517,7 +518,7 @@ const SecondBabyBadge = styled.View`
   margin-bottom: 8px;
 `;
 
-const SecondBabyBadgeText = styled.Text`
+const SecondBabyBadgeText = styled(AppText)`
   font-size: 11px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: #ffffff;
