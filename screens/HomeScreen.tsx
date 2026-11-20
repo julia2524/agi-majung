@@ -219,22 +219,22 @@ export default function HomeScreen({ navigation, route }: Props) {
 
   return (
     <Container>
-      {/* <ScrollContent
+      <ScrollContent
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: 20,
-          paddingTop: 16,
+          paddingTop: insets.top,
           paddingBottom: 24,
         }}
-      > */}
-      <ScrollContent
+      >
+        {/* <ScrollContent
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: 20,
           paddingTop: 16 + insets.top,
           paddingBottom: 24,
         }}
-      >
+      > */}
         {/* ========== 헤더 (최소화) ========== */}
         <Header>
           <HeaderText>아기마중</HeaderText>
