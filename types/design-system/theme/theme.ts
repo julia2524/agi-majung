@@ -52,6 +52,7 @@ export const theme = {
   },
 
   fontFamily: {
+    brand: "BMJUA", // ★ 메인 타이틀('아기마중') 및 포인트 전용
     regular: "NotoSansKRRegular",
     medium: "NotoSansKRMedium",
     bold: "NotoSansKRBold",

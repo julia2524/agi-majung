@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled, { useTheme } from "styled-components/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
 import { RootStackParamList } from "../navigation/types";
@@ -33,6 +36,7 @@ const TAGS: { id: number; name: string }[] = [
 ];
 
 export default function ChecklistScreen({ navigation, route }: Props) {
+  const insets = useSafeAreaInsets();
   const { width, fontScale } = useWindowDimensions();
 
   const isCompactFilter = width < 360 || fontScale >= 1.3;
@@ -484,11 +488,15 @@ export default function ChecklistScreen({ navigation, route }: Props) {
 
         <BottomSpace />
       </ScrollContent>
-      <TopButton activeOpacity={0.8} onPress={handleScrollToTop}>
+      <TopButton
+        activeOpacity={0.8}
+        onPress={handleScrollToTop}
+        bottomInset={insets.bottom}
+      >
         <Ionicons name="arrow-up" size={20} color="#FFFFFF" />
       </TopButton>
       {/* 하단 광고 */}
-      <BottomAdContainer>
+      <BottomAdContainer bottomInset={insets.bottom}>
         <BannerAd />
       </BottomAdContainer>
     </Container>
@@ -765,15 +773,15 @@ const BottomSpace = styled.View`
   height: 40px;
 `;
 
-const BottomAdContainer = styled.View`
-  height: 60px;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  background-color: #f8fafc;
-  border-top-width: 1px;
-  border-top-color: #e2e8f0;
-`;
+// const BottomAdContainer = styled.View`
+//   height: 60px;
+//   width: 100%;
+//   align-items: center;
+//   justify-content: center;
+//   background-color: #f8fafc;
+//   border-top-width: 1px;
+//   border-top-color: #e2e8f0;
+// `;
 
 const TagScrollView = styled.ScrollView`
   margin-top: 10px;
@@ -808,22 +816,50 @@ const TagText = styled(AppText)<{ selected: boolean }>`
   color: ${({ selected, theme }) =>
     selected ? "#FFFFFF" : theme.colors.textSecondary};
 `;
-const TopButton = styled.TouchableOpacity`
-  position: absolute;
+// const TopButton = styled.TouchableOpacity`
+//   position: absolute;
 
-  right: 20px;
-  bottom: 75px;
+//   right: 20px;
+//   bottom: 75px;
 
-  width: 44px;
-  height: 44px;
+//   width: 44px;
+//   height: 44px;
 
-  border-radius: 22px;
+//   border-radius: 22px;
 
-  background-color: ${({ theme }) => theme.colors.primary};
+//   background-color: ${({ theme }) => theme.colors.primary};
 
+//   align-items: center;
+//   justify-content: center;
+
+//   elevation: 5;
+//   shadow-color: #000;
+//   shadow-opacity: 0.15;
+//   shadow-radius: 6px;
+//   shadow-offset: 0px 3px;
+// `;
+
+const BottomAdContainer = styled.View<{ bottomInset: number }>`
+  width: 100%;
+  min-height: ${({ bottomInset }) => 60 + bottomInset}px;
+  padding-bottom: ${({ bottomInset }) => bottomInset}px;
   align-items: center;
   justify-content: center;
+  background-color: #f8fafc;
+  border-top-width: 1px;
+  border-top-color: #e2e8f0;
+`;
 
+const TopButton = styled.TouchableOpacity<{ bottomInset: number }>`
+  position: absolute;
+  right: 20px;
+  bottom: ${({ bottomInset }) => 75 + bottomInset}px;
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  background-color: ${({ theme }) => theme.colors.primary};
+  align-items: center;
+  justify-content: center;
   elevation: 5;
   shadow-color: #000;
   shadow-opacity: 0.15;

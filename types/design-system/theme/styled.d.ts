@@ -9,6 +9,7 @@ declare module "styled-components/native" {
       bold: string;
       extraBold: string;
       black: string;
+      brand: string;
     };
     typography: {
       hero: number;

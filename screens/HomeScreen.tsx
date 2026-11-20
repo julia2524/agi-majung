@@ -24,6 +24,7 @@ import { calculateUrgency, getItemTimingStatus } from "../utils/itemTiming";
 import { GlossyDot } from "../components/GlossyDot/GlossyDot";
 import { useWindowDimensions } from "react-native";
 import { AppText } from "../utils/AppText";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Props = NativeStackScreenProps<RootStackParamList, "HomeScreen">;
 
@@ -50,6 +51,7 @@ function formatDDay(dDay: number): string {
 }
 
 export default function HomeScreen({ navigation, route }: Props) {
+  const insets = useSafeAreaInsets();
   const { width: windowWidth, fontScale } = useWindowDimensions();
 
   // 디스플레이 크기를 최대로 했을 때도
@@ -217,11 +219,19 @@ export default function HomeScreen({ navigation, route }: Props) {
 
   return (
     <Container>
-      <ScrollContent
+      {/* <ScrollContent
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: 20,
           paddingTop: 16,
+          paddingBottom: 24,
+        }}
+      > */}
+      <ScrollContent
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingTop: 16 + insets.top,
           paddingBottom: 24,
         }}
       >
@@ -441,7 +451,7 @@ export default function HomeScreen({ navigation, route }: Props) {
         <BottomSpace />
       </ScrollContent>
 
-      <BottomAdContainer>
+      <BottomAdContainer bottomInset={insets.bottom}>
         <BannerAd />
       </BottomAdContainer>
     </Container>
@@ -472,7 +482,7 @@ const Header = styled.View`
 const HeaderText = styled(AppText)`
   flex-shrink: 1;
   font-size: ${({ theme }) => theme.typography.heading}px;
-  font-family: ${({ theme }) => theme.fontFamily.bold};
+  font-family: ${({ theme }) => theme.fontFamily.brand};
   color: ${({ theme }) => theme.colors.text};
 `;
 
@@ -800,9 +810,19 @@ const BottomSpace = styled.View`
   height: 24px;
 `;
 
-const BottomAdContainer = styled.View`
-  height: 60px;
+// const BottomAdContainer = styled.View`
+//   height: 60px;
+//   width: 100%;
+//   align-items: center;
+//   justify-content: center;
+//   background-color: #f8fafc;
+//   border-top-width: 1px;
+//   border-top-color: #e2e8f0;
+// `;
+const BottomAdContainer = styled.View<{ bottomInset: number }>`
   width: 100%;
+  min-height: ${({ bottomInset }) => 60 + bottomInset}px;
+  padding-bottom: ${({ bottomInset }) => bottomInset}px;
   align-items: center;
   justify-content: center;
   background-color: #f8fafc;

@@ -22,7 +22,7 @@ const Container = styled.View`
 const Title = styled.Text`
   margin-top: 20px;
   font-size: ${({ theme }) => theme.typography.title}px;
-  font-family: ${({ theme }) => theme.fontFamily.bold};
+  font-family: ${({ theme }) => theme.fontFamily.brand};
   color: ${({ theme }) => theme.colors.text};
 `;
 

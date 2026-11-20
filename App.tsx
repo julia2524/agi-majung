@@ -90,6 +90,7 @@ export default function App() {
     NotoSansKRBold: require("./assets/fonts/NotoSansKR-Bold.ttf"),
     NotoSansKRMedium: require("./assets/fonts/NotoSansKR-Medium.ttf"),
     NotoSansKRRegular: require("./assets/fonts/NotoSansKR-Regular.ttf"),
+    BMJUA: require("./assets/fonts/Jua-Regular.ttf"), // ★ 파일 경로와 이름을 맞춰주세요
   });
 
   useEffect(() => {
