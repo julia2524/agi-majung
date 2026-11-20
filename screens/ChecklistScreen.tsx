@@ -51,6 +51,17 @@ export default function ChecklistScreen({ navigation, route }: Props) {
   );
 
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
+
+  const [hasHorizontalOverflow, setHasHorizontalOverflow] = useState(false);
+  const [tagViewportWidth, setTagViewportWidth] = useState(0);
+  const [tagContentWidth, setTagContentWidth] = useState(0);
+
+  useEffect(() => {
+    if (tagViewportWidth > 0 && tagContentWidth > 0) {
+      // 2px 정도 여유를 둬서 소수점 픽셀 오차로 불필요하게 뜨는 것을 방지
+      setHasHorizontalOverflow(tagContentWidth > tagViewportWidth + 2);
+    }
+  }, [tagViewportWidth, tagContentWidth]);
   // 1. 현재 주수 계산
   const currentWeek = useMemo(() => {
     const today = new Date();
@@ -343,7 +354,42 @@ export default function ChecklistScreen({ navigation, route }: Props) {
             </FilterTabText>
           </FilterTab>
         </FilterContainer>
+
         <TagScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          onLayout={(e) => setTagViewportWidth(e.nativeEvent.layout.width)}
+          onContentSizeChange={(contentWidth) =>
+            setTagContentWidth(contentWidth)
+          }
+          contentContainerStyle={{
+            paddingRight: 20, // 스크롤 끝까지 밀었을 때 오른쪽 끝 여백 유지
+          }}
+        >
+          {TAGS.map((tag, index) => {
+            const isSelected = selectedTags.includes(tag.id);
+            const isLast = index === TAGS.length - 1;
+
+            return (
+              <TagButton
+                key={tag.id}
+                selected={isSelected}
+                isLast={isLast}
+                onPress={() => handleTagPress(tag.id)}
+              >
+                <TagText selected={isSelected}>#{tag.name}</TagText>
+              </TagButton>
+            );
+          })}
+        </TagScrollView>
+        <TagHeaderRow>
+          {/* <TagSectionTitle>태그 필터</TagSectionTitle> */}
+          {hasHorizontalOverflow && (
+            <ScrollHintText>↔ 좌우로 스크롤하여 전체 보기</ScrollHintText>
+          )}
+        </TagHeaderRow>
+
+        {/* <TagScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{
@@ -365,7 +411,7 @@ export default function ChecklistScreen({ navigation, route }: Props) {
               </TagButton>
             );
           })}
-        </TagScrollView>
+        </TagScrollView> */}
         {/* 준비물 목록 */}
         <ItemList>
           {filteredCategoryItems.map((item) => {
@@ -865,4 +911,23 @@ const TopButton = styled.TouchableOpacity<{ bottomInset: number }>`
   shadow-opacity: 0.15;
   shadow-radius: 6px;
   shadow-offset: 0px 3px;
+`;
+
+const TagHeaderRow = styled.View`
+  margin-top: -10px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+`;
+
+const TagSectionTitle = styled(AppText)`
+  font-size: ${({ theme }) => theme.typography.tiny}px;
+  font-family: ${({ theme }) => theme.fontFamily.bold};
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const ScrollHintText = styled(AppText)`
+  font-size: ${({ theme }) => theme.typography.tiny}px;
+  font-family: ${({ theme }) => theme.fontFamily.medium};
+  color: ${({ theme }) => theme.colors.textSecondary};
 `;
