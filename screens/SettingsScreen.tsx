@@ -9,7 +9,6 @@ import BabyHeader from "../components/BabyHeader";
 import { deleteAllData, resetCheckedItems } from "../storage/storage";
 import { AppText } from "../utils/AppText";
 import CustomAlert from "../components/CustomAlert";
-import LanguageSwitcher from "../components/LanguageSwitcher";
 
 type Props = NativeStackScreenProps<RootStackParamList, "SettingScreen">;
 

@@ -1,21 +1,16 @@
-import React, { useCallback, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  Keyboard,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import React, { useCallback, useRef, useState } from "react";
+import { ActivityIndicator, Alert, Keyboard, ScrollView } from "react-native";
+import styled, { useTheme } from "styled-components/native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useFocusEffect } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 import type { RootStackParamList } from "../navigation/types";
+import BabyHeader from "../components/BabyHeader";
 import {
   getMyCategories,
   getMyItems,
@@ -24,6 +19,9 @@ import {
   type CustomCategory,
   type MyItem,
 } from "../storage/storage";
+import BannerAd from "../services/BannerAd";
+import { AppText } from "../utils/AppText";
+import CustomAlert from "../components/CustomAlert";
 
 type Props = NativeStackScreenProps<RootStackParamList, "CustomItemScreen">;
 
@@ -32,6 +30,10 @@ type IconName = keyof typeof Ionicons.glyphMap;
 export default function CustomItemScreen({ navigation, route }: Props) {
   const { categoryId } = route.params;
 
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+  const scrollRef = useRef<ScrollView>(null);
+
   const [category, setCategory] = useState<CustomCategory | null>(null);
   const [items, setItems] = useState<MyItem[]>([]);
   const [newItemTitle, setNewItemTitle] = useState("");
@@ -39,7 +41,16 @@ export default function CustomItemScreen({ navigation, route }: Props) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // 현재 카테고리의 데이터 불러오기
+  const [itemToDelete, setItemToDelete] = useState<MyItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleCloseDeleteAlert = () => {
+    if (!deleting) {
+      setItemToDelete(null);
+    }
+  };
+
+  // 현재 카테고리 데이터 불러오기
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
@@ -77,7 +88,7 @@ export default function CustomItemScreen({ navigation, route }: Props) {
 
   useFocusEffect(
     useCallback(() => {
-      loadData();
+      void loadData();
     }, [loadData]),
   );
 
@@ -98,11 +109,7 @@ export default function CustomItemScreen({ navigation, route }: Props) {
   const handleAddItem = async () => {
     const title = newItemTitle.trim();
 
-    if (!title) {
-      return;
-    }
-
-    if (saving) {
+    if (!title || saving) {
       return;
     }
 
@@ -153,379 +160,554 @@ export default function CustomItemScreen({ navigation, route }: Props) {
     }
   };
 
-  // 준비물 삭제
+  // 삭제 버튼 클릭 시 CustomAlert 열기
   const handleDeleteItem = (targetItem: MyItem) => {
-    Alert.alert(
-      "준비물을 삭제할까요?",
-      `"${targetItem.title}" 항목을 삭제할게요.`,
-      [
-        {
-          text: "취소",
-          style: "cancel",
-        },
-        {
-          text: "삭제",
-          style: "destructive",
-          onPress: async () => {
-            if (saving) {
-              return;
-            }
-
-            try {
-              setSaving(true);
-
-              const updatedItems = items.filter(
-                (item) => item.id !== targetItem.id,
-              );
-
-              await saveCategoryItems(updatedItems);
-            } catch (error) {
-              console.error("준비물 삭제 실패:", error);
-              Alert.alert("오류", "준비물을 삭제하지 못했어요.");
-            } finally {
-              setSaving(false);
-            }
-          },
-        },
-      ],
-    );
+    if (saving || deleting) {
+      return;
+    }
+    setItemToDelete(targetItem);
   };
 
+  // CustomAlert에서 '삭제' 확정 시 실제 삭제 처리
+  const handleConfirmDeleteItem = async () => {
+    if (!itemToDelete || deleting) {
+      return;
+    }
+
+    const targetItem = itemToDelete;
+
+    try {
+      setDeleting(true);
+
+      const updatedItems = items.filter((item) => item.id !== targetItem.id);
+      await saveCategoryItems(updatedItems);
+
+      setItemToDelete(null);
+    } catch (error) {
+      console.error("준비물 삭제 실패:", error);
+      Alert.alert("오류", "준비물을 삭제하지 못했어요.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  // 진행률 계산
   const checkedCount = items.filter((item) => item.isChecked).length;
   const progress =
     items.length > 0 ? Math.round((checkedCount / items.length) * 100) : 0;
 
-  const renderItem = ({ item }: { item: MyItem }) => (
-    <View style={styles.itemCard}>
-      <Pressable
-        style={styles.itemMain}
-        onPress={() => handleToggleItem(item)}
-        disabled={saving}
-      >
-        <View
-          style={[styles.checkbox, item.isChecked && styles.checkboxChecked]}
-        >
-          {item.isChecked && (
-            <Ionicons name="checkmark" size={17} color="#FFFFFF" />
-          )}
-        </View>
+  const isAddDisabled = !newItemTitle.trim() || saving;
 
-        <Text
-          style={[styles.itemTitle, item.isChecked && styles.itemTitleChecked]}
-        >
-          {item.title}
-        </Text>
-      </Pressable>
-
-      <Pressable
-        style={styles.deleteButton}
-        onPress={() => handleDeleteItem(item)}
-        disabled={saving}
-        hitSlop={8}
-      >
-        <Ionicons name="trash-outline" size={19} color="#C4A5A5" />
-      </Pressable>
-    </View>
-  );
+  // 맨 위로 이동
+  const handleScrollToTop = () => {
+    scrollRef.current?.scrollTo({
+      y: 0,
+      animated: true,
+    });
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* 헤더 */}
-      <View style={styles.header}>
-        <Pressable
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="chevron-back" size={25} color="#514966" />
-        </Pressable>
-
-        <Text style={styles.headerTitle} numberOfLines={1}>
-          {category?.name ?? "준비물"}
-        </Text>
-
-        <View style={styles.headerRight} />
-      </View>
+    <Container edges={["top"]}>
+      {/* 고정 헤더 */}
+      <BabyHeader
+        title={category?.name ?? "나만의 준비물"}
+        onBackPress={() => navigation.goBack()}
+      />
 
       {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#9583CA" />
-        </View>
+        <LoadingContainer>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </LoadingContainer>
       ) : (
-        <View style={styles.content}>
-          {/* 카테고리 정보 */}
-          <View style={styles.categoryInfo}>
-            <View style={styles.categoryIcon}>
-              <Ionicons
-                name={(category?.icon ?? "heart-outline") as IconName}
-                size={29}
-                color="#8B78C8"
-              />
-            </View>
-
-            <View style={styles.categoryTextArea}>
-              <Text style={styles.categoryName}>{category?.name}</Text>
-
-              <Text style={styles.progressText}>
-                {checkedCount}개 완료 · 전체 {items.length}개
-              </Text>
-            </View>
-
-            <Text style={styles.progressPercent}>{progress}%</Text>
-          </View>
-
-          {/* 진행률 */}
-          <View style={styles.progressBackground}>
-            <View style={[styles.progressFill, { width: `${progress}%` }]} />
-          </View>
-
-          {/* 준비물 추가 */}
-          <View style={styles.addItemContainer}>
-            <TextInput
-              style={styles.addItemInput}
-              value={newItemTitle}
-              onChangeText={setNewItemTitle}
-              placeholder="새로운 준비물을 입력해 봐!"
-              placeholderTextColor="#B8B2C2"
-              maxLength={50}
-              returnKeyType="done"
-              onSubmitEditing={handleAddItem}
-              editable={!saving}
-            />
-
-            <Pressable
-              style={[
-                styles.addButton,
-                (!newItemTitle.trim() || saving) && styles.addButtonDisabled,
-              ]}
-              onPress={handleAddItem}
-              disabled={!newItemTitle.trim() || saving}
-            >
-              <Ionicons name="add" size={23} color="#FFFFFF" />
-            </Pressable>
-          </View>
-
-          {/* 준비물 목록 */}
-          <FlatList
-            data={items}
-            keyExtractor={(item) => String(item.id)}
-            renderItem={renderItem}
-            contentContainerStyle={styles.listContent}
+        <>
+          <ScrollContent
+            ref={scrollRef}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
-            ListHeaderComponent={
-              items.length > 0 ? (
-                <Text style={styles.listHeader}>우리 아기 준비물</Text>
-              ) : null
-            }
-            ListEmptyComponent={
-              <View style={styles.emptyContainer}>
-                <Ionicons name="clipboard-outline" size={48} color="#C8C1D7" />
-                <Text style={styles.emptyTitle}>아직 준비물이 없어요.</Text>
-                <Text style={styles.emptyDescription}>
+          >
+            {/* 카테고리 진행률 */}
+            <ProgressCard>
+              <ProgressHeader>
+                <CategoryHeading>
+                  <CategoryIcon>
+                    <Ionicons
+                      name={(category?.icon ?? "heart-outline") as IconName}
+                      size={25}
+                      color={theme.colors.primary}
+                    />
+                  </CategoryIcon>
+
+                  <CategoryTitleArea>
+                    <ProgressTitle>{category?.name ?? "준비물"}</ProgressTitle>
+                    <ProgressDescription>
+                      우리 아기를 위한 준비 목록이에요.
+                    </ProgressDescription>
+                  </CategoryTitleArea>
+                </CategoryHeading>
+
+                <ProgressCount>{progress}%</ProgressCount>
+              </ProgressHeader>
+
+              <ProgressBar>
+                <ProgressFill progress={progress} />
+              </ProgressBar>
+
+              <ProgressFooter>
+                <ProgressFooterText>
+                  {checkedCount}개 완료 · 전체 {items.length}개
+                </ProgressFooterText>
+                <ProgressFooterText>
+                  {items.length > 0 && checkedCount === items.length
+                    ? "모두 준비했어요!"
+                    : "하나씩 준비해 봐요!"}
+                </ProgressFooterText>
+              </ProgressFooter>
+            </ProgressCard>
+
+            {/* 준비물 추가 */}
+            <SectionHeader>
+              <SectionTitle>준비물 추가하기</SectionTitle>
+            </SectionHeader>
+
+            <AddItemContainer>
+              <AddItemInput
+                value={newItemTitle}
+                onChangeText={setNewItemTitle}
+                placeholder="새로운 준비물을 입력해 주세요."
+                placeholderTextColor={theme.colors.textSecondary}
+                maxLength={50}
+                returnKeyType="done"
+                onSubmitEditing={handleAddItem}
+                editable={!saving}
+              />
+
+              <AddButton
+                disabled={isAddDisabled}
+                $disabled={isAddDisabled}
+                onPress={handleAddItem}
+              >
+                <Ionicons name="add" size={24} color="#FFFFFF" />
+              </AddButton>
+            </AddItemContainer>
+
+            {/* 준비물 목록 */}
+            <SectionHeader>
+              <SectionTitle>우리 아기 준비물</SectionTitle>
+              <SectionCount>{items.length}개</SectionCount>
+            </SectionHeader>
+
+            {items.length > 0 ? (
+              <ItemList>
+                {items.map((item) => (
+                  <ItemCard key={String(item.id)}>
+                    <ItemMain
+                      onPress={() => handleToggleItem(item)}
+                      disabled={saving}
+                    >
+                      <Checkbox checked={item.isChecked}>
+                        {item.isChecked && (
+                          <Ionicons
+                            name="checkmark"
+                            size={16}
+                            color="#FFFFFF"
+                          />
+                        )}
+                      </Checkbox>
+
+                      <ItemTitle checked={item.isChecked}>
+                        {item.title}
+                      </ItemTitle>
+                    </ItemMain>
+
+                    <DeleteButton
+                      onPress={() => handleDeleteItem(item)}
+                      disabled={saving}
+                      hitSlop={8}
+                    >
+                      <Ionicons
+                        name="trash-outline"
+                        size={18}
+                        color={theme.colors.textSecondary}
+                      />
+                    </DeleteButton>
+                  </ItemCard>
+                ))}
+              </ItemList>
+            ) : (
+              <EmptyContainer>
+                <EmptyIconWrapper>
+                  <Ionicons
+                    name="file-tray-outline"
+                    size={44}
+                    color={theme.colors.textSecondary}
+                  />
+                </EmptyIconWrapper>
+
+                <EmptyTitle>아직 준비물이 없어요.</EmptyTitle>
+
+                <EmptyDescription>
                   위 입력창에 준비물을 추가해 봐요!
-                </Text>
-              </View>
-            }
-            ListFooterComponent={
-              saving ? (
-                <View style={styles.savingIndicator}>
-                  <ActivityIndicator size="small" color="#9583CA" />
-                </View>
-              ) : null
-            }
-          />
-        </View>
+                </EmptyDescription>
+              </EmptyContainer>
+            )}
+
+            {saving && (
+              <SavingIndicator>
+                <ActivityIndicator size="small" color={theme.colors.primary} />
+              </SavingIndicator>
+            )}
+
+            <BottomSpace />
+          </ScrollContent>
+
+          {/* 맨 위로 이동 */}
+          <TopButton
+            activeOpacity={0.8}
+            onPress={handleScrollToTop}
+            bottomInset={insets.bottom}
+          >
+            <Ionicons name="arrow-up" size={20} color="#FFFFFF" />
+          </TopButton>
+        </>
       )}
-    </SafeAreaView>
+      {/* 준비물 삭제 확인 커스텀 알림 */}
+      <CustomAlert
+        visible={Boolean(itemToDelete)}
+        title="준비물을 삭제할까요?"
+        message={
+          itemToDelete ? `"${itemToDelete.title}" 항목을 삭제할게요.` : ""
+        }
+        showCancel
+        confirmText={deleting ? "삭제 중..." : "삭제"}
+        confirmVariant="danger"
+        onClose={handleCloseDeleteAlert}
+        onCancel={handleCloseDeleteAlert}
+        onConfirm={handleConfirmDeleteItem}
+      />
+      {/* 하단 광고 */}
+      <BottomAdContainer bottomInset={insets.bottom}>
+        <BannerAd />
+      </BottomAdContainer>
+    </Container>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FAF9FC",
-  },
-  header: {
-    height: 56,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0EDF4",
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-  },
-  headerTitle: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#514966",
-  },
-  headerRight: {
-    width: 40,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  categoryInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingTop: 24,
-    paddingBottom: 17,
-  },
-  categoryIcon: {
-    width: 55,
-    height: 55,
-    borderRadius: 17,
-    backgroundColor: "#F0ECF9",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 13,
-  },
-  categoryTextArea: {
-    flex: 1,
-  },
-  categoryName: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: "#514966",
-    marginBottom: 6,
-  },
-  progressText: {
-    fontSize: 12,
-    color: "#9992A6",
-  },
-  progressPercent: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: "#9583CA",
-  },
-  progressBackground: {
-    height: 7,
-    backgroundColor: "#EDE9F4",
-    borderRadius: 10,
-    overflow: "hidden",
-    marginBottom: 22,
-  },
-  progressFill: {
-    height: "100%",
-    backgroundColor: "#A99AD5",
-    borderRadius: 10,
-  },
-  addItemContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 23,
-    gap: 9,
-  },
-  addItemInput: {
-    flex: 1,
-    height: 49,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 13,
-    borderWidth: 1,
-    borderColor: "#EAE5F1",
-    paddingHorizontal: 14,
-    fontSize: 13,
-    color: "#514966",
-  },
-  addButton: {
-    width: 49,
-    height: 49,
-    borderRadius: 13,
-    backgroundColor: "#9583CA",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  addButtonDisabled: {
-    backgroundColor: "#C9C1DD",
-  },
-  listContent: {
-    paddingBottom: 30,
-    flexGrow: 1,
-  },
-  listHeader: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#716982",
-    marginBottom: 12,
-  },
-  itemCard: {
-    minHeight: 59,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 14,
-    marginBottom: 9,
-    paddingHorizontal: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#F0EDF5",
-  },
-  itemMain: {
-    flex: 1,
-    minHeight: 58,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  checkbox: {
-    width: 23,
-    height: 23,
-    borderRadius: 8,
-    borderWidth: 1.5,
-    borderColor: "#D8D1E5",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  checkboxChecked: {
-    backgroundColor: "#9583CA",
-    borderColor: "#9583CA",
-  },
-  itemTitle: {
-    flex: 1,
-    fontSize: 14,
-    color: "#5D566B",
-  },
-  itemTitleChecked: {
-    color: "#B4AEBB",
-    textDecorationLine: "line-through",
-  },
-  deleteButton: {
-    width: 36,
-    height: 45,
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: 8,
-  },
-  emptyContainer: {
-    flex: 1,
-    minHeight: 220,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  emptyTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#777084",
-    marginTop: 15,
-  },
-  emptyDescription: {
-    fontSize: 12,
-    color: "#AAA4B3",
-    marginTop: 7,
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  savingIndicator: {
-    paddingVertical: 12,
-  },
-});
+/* --------------------------------
+   Styled Components
+--------------------------------- */
+
+const Container = styled(SafeAreaView)`
+  flex: 1;
+  background-color: ${({ theme }) => theme.colors.background};
+`;
+
+const ScrollContent = styled.ScrollView`
+  flex: 1;
+  padding-horizontal: 20px;
+`;
+
+const ProgressCard = styled.View`
+  margin-top: 12px;
+  padding: 16px;
+  border-radius: 16px;
+  background-color: ${({ theme }) => theme.colors.card};
+  border-width: 1px;
+  border-color: ${({ theme }) => theme.colors.border};
+`;
+
+const ProgressHeader = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 13px;
+`;
+
+const CategoryHeading = styled.View`
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  margin-right: 10px;
+`;
+
+const CategoryIcon = styled.View`
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background-color: ${({ theme }) => theme.colors.background};
+  align-items: center;
+  justify-content: center;
+  margin-right: 11px;
+`;
+
+// const CategoryTitleArea = styled.View`
+//   flex: 1;
+// `;
+
+// const ProgressTitle = styled(AppText)`
+//   font-size: ${({ theme }) => theme.typography.button}px;
+//   font-family: ${({ theme }) => theme.fontFamily.bold};
+//   color: ${({ theme }) => theme.colors.text};
+// `;
+
+// const ProgressDescription = styled(AppText)`
+//   margin-top: 4px;
+//   font-size: ${({ theme }) => theme.typography.tiny}px;
+//   font-family: ${({ theme }) => theme.fontFamily.regular};
+//   color: ${({ theme }) => theme.colors.textSecondary};
+// `;
+
+const ProgressCount = styled(AppText)`
+  font-size: ${({ theme }) => theme.typography.button}px;
+  font-family: ${({ theme }) => theme.fontFamily.bold};
+  color: ${({ theme }) => theme.colors.primary};
+`;
+
+const ProgressBar = styled.View`
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background-color: ${({ theme }) => theme.colors.border};
+  overflow: hidden;
+`;
+
+const ProgressFill = styled.View<{ progress: number }>`
+  width: ${({ progress }) => `${progress}%`};
+  height: 100%;
+  border-radius: 4px;
+  background-color: ${({ theme }) => theme.colors.primary};
+`;
+
+const ProgressFooter = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+`;
+
+const ProgressFooterText = styled(AppText)`
+  font-size: ${({ theme }) => theme.typography.tiny}px;
+  font-family: ${({ theme }) => theme.fontFamily.medium};
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const SectionHeader = styled.View`
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 22px;
+  margin-bottom: 12px;
+`;
+
+const SectionTitle = styled(AppText)`
+  font-size: ${({ theme }) => theme.typography.button}px;
+  font-family: ${({ theme }) => theme.fontFamily.bold};
+  color: ${({ theme }) => theme.colors.text};
+`;
+
+const SectionCount = styled(AppText)`
+  font-size: ${({ theme }) => theme.typography.small}px;
+  font-family: ${({ theme }) => theme.fontFamily.medium};
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const AddItemContainer = styled.View`
+  flex-direction: row;
+  align-items: center;
+  gap: 9px;
+`;
+
+const AddItemInput = styled.TextInput`
+  flex: 1;
+  height: 50px;
+  border-radius: 13px;
+  background-color: ${({ theme }) => theme.colors.card};
+  border-width: 1px;
+  border-color: ${({ theme }) => theme.colors.border};
+  padding-horizontal: 14px;
+  font-size: ${({ theme }) => theme.typography.small}px;
+  color: ${({ theme }) => theme.colors.text};
+`;
+
+const AddButton = styled.Pressable<{ $disabled: boolean }>`
+  width: 50px;
+  height: 50px;
+  border-radius: 13px;
+  background-color: ${({ $disabled, theme }) =>
+    $disabled ? theme.colors.border : theme.colors.primary};
+  align-items: center;
+  justify-content: center;
+`;
+
+const ItemList = styled.View`
+  gap: 10px;
+`;
+
+const ItemCard = styled.View`
+  width: 100%;
+  min-height: 62px;
+  padding: 6px 12px 6px 16px;
+  border-radius: 18px;
+  background-color: ${({ theme }) => theme.colors.card};
+  border-width: 1px;
+  border-color: ${({ theme }) => theme.colors.border};
+  flex-direction: row;
+  align-items: center;
+`;
+
+const ItemMain = styled.Pressable`
+  flex: 1;
+  min-height: 48px;
+  flex-direction: row;
+  align-items: center;
+`;
+
+const Checkbox = styled.View<{ checked: boolean }>`
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  border-width: 1.5px;
+  border-color: ${({ checked, theme }) =>
+    checked ? theme.colors.primary : theme.colors.border};
+  background-color: ${({ checked, theme }) =>
+    checked ? theme.colors.primary : "transparent"};
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+`;
+
+const ItemTitle = styled(AppText)<{ checked: boolean }>`
+  flex: 1;
+  font-size: ${({ theme }) => theme.typography.body}px;
+  font-family: ${({ checked, theme }) =>
+    checked ? theme.fontFamily.regular : theme.fontFamily.medium};
+  color: ${({ checked, theme }) =>
+    checked ? theme.colors.textSecondary : theme.colors.text};
+  text-decoration-line: ${({ checked }) => (checked ? "line-through" : "none")};
+`;
+
+const DeleteButton = styled.Pressable`
+  width: 38px;
+  height: 46px;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+`;
+
+// const EmptyContainer = styled.View`
+//   align-items: center;
+//   justify-content: center;
+//   padding: 45px 20px;
+//   border-radius: 18px;
+//   background-color: ${({ theme }) => theme.colors.card};
+//   border-width: 1px;
+//   border-color: ${({ theme }) => theme.colors.border};
+// `;
+
+// const EmptyIconWrapper = styled.View`
+//   margin-bottom: 12px;
+//   opacity: 0.7;
+// `;
+
+// const EmptyTitle = styled(AppText)`
+//   font-size: ${({ theme }) => theme.typography.body}px;
+//   font-family: ${({ theme }) => theme.fontFamily.bold};
+//   color: ${({ theme }) => theme.colors.textSecondary};
+//   text-align: center;
+// `;
+
+// const EmptyDescription = styled(AppText)`
+//   font-size: ${({ theme }) => theme.typography.small}px;
+//   font-family: ${({ theme }) => theme.fontFamily.regular};
+//   color: ${({ theme }) => theme.colors.textSecondary};
+//   text-align: center;
+// `;
+
+const LoadingContainer = styled.View`
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+`;
+
+const SavingIndicator = styled.View`
+  padding-vertical: 14px;
+`;
+
+const BottomSpace = styled.View`
+  height: 40px;
+`;
+
+const BottomAdContainer = styled.View<{ bottomInset: number }>`
+  width: 100%;
+  min-height: ${({ bottomInset }) => 60 + bottomInset}px;
+  padding-bottom: ${({ bottomInset }) => bottomInset}px;
+  align-items: center;
+  justify-content: center;
+  background-color: ${({ theme }) => theme.colors.background};
+  border-top-width: 1px;
+  border-top-color: ${({ theme }) => theme.colors.border};
+`;
+
+const TopButton = styled.TouchableOpacity<{ bottomInset: number }>`
+  position: absolute;
+  right: 20px;
+  bottom: ${({ bottomInset }) => 75 + bottomInset}px;
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  background-color: ${({ theme }) => theme.colors.primary};
+  align-items: center;
+  justify-content: center;
+  elevation: 5;
+  shadow-color: #000;
+  shadow-opacity: 0.15;
+  shadow-radius: 6px;
+  shadow-offset: 0px 3px;
+`;
+
+const CategoryTitleArea = styled.View`
+  flex: 1;
+`;
+
+const ProgressTitle = styled(AppText)`
+  font-size: ${({ theme }) => theme.typography.button}px;
+  line-height: ${({ theme }) => Math.round(theme.typography.button * 1.25)}px;
+  font-family: ${({ theme }) => theme.fontFamily.bold};
+  color: ${({ theme }) => theme.colors.text};
+`;
+
+const ProgressDescription = styled(AppText)`
+  margin-top: 4px;
+  font-size: ${({ theme }) => theme.typography.tiny}px;
+  line-height: ${({ theme }) => Math.round(theme.typography.tiny * 1.3)}px;
+  font-family: ${({ theme }) => theme.fontFamily.regular};
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const EmptyContainer = styled.View`
+  align-items: center;
+  justify-content: center;
+  padding: 28px 20px;
+  border-radius: 18px;
+  background-color: ${({ theme }) => theme.colors.card};
+  border-width: 1px;
+  border-color: ${({ theme }) => theme.colors.border};
+`;
+
+const EmptyIconWrapper = styled.View`
+  margin-bottom: 6px;
+  opacity: 0.7;
+`;
+
+const EmptyTitle = styled(AppText)`
+  font-size: ${({ theme }) => theme.typography.body}px;
+  font-family: ${({ theme }) => theme.fontFamily.bold};
+  color: ${({ theme }) => theme.colors.textSecondary};
+  text-align: center;
+`;
+
+const EmptyDescription = styled(AppText)`
+  font-size: ${({ theme }) => theme.typography.small}px;
+  font-family: ${({ theme }) => theme.fontFamily.regular};
+  color: ${({ theme }) => theme.colors.textSecondary};
+  text-align: center;
+`;
