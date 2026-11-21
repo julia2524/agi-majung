@@ -383,35 +383,11 @@ export default function ChecklistScreen({ navigation, route }: Props) {
           })}
         </TagScrollView>
         <TagHeaderRow>
-          {/* <TagSectionTitle>태그 필터</TagSectionTitle> */}
           {hasHorizontalOverflow && (
             <ScrollHintText>↔ 좌우로 스크롤하여 전체 보기</ScrollHintText>
           )}
         </TagHeaderRow>
 
-        {/* <TagScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingRight: 20, // 스크롤 끝까지 밀었을 때 오른쪽 끝 여백 유지
-          }}
-        >
-          {TAGS.map((tag, index) => {
-            const isSelected = selectedTags.includes(tag.id);
-            const isLast = index === TAGS.length - 1;
-
-            return (
-              <TagButton
-                key={tag.id}
-                selected={isSelected}
-                isLast={isLast}
-                onPress={() => handleTagPress(tag.id)}
-              >
-                <TagText selected={isSelected}>#{tag.name}</TagText>
-              </TagButton>
-            );
-          })}
-        </TagScrollView> */}
         {/* 준비물 목록 */}
         <ItemList>
           {filteredCategoryItems.map((item) => {
@@ -716,40 +692,6 @@ const DetailButton = styled.TouchableOpacity`
   align-items: center;
 `;
 
-const TitleRow = styled.View`
-  flex-direction: row;
-  align-items: center;
-  gap: 6px;
-`;
-
-const ItemName = styled(AppText)<{ checked: boolean }>`
-  font-size: ${({ theme }) => theme.typography.body}px;
-  font-family: ${({ theme }) => theme.fontFamily.bold};
-  color: ${({ theme, checked }) =>
-    checked ? theme.colors.textSecondary : theme.colors.text};
-  text-decoration-line: ${({ checked }) => (checked ? "line-through" : "none")};
-`;
-
-const QuantityText = styled(AppText)`
-  font-size: ${({ theme }) => theme.typography.small}px;
-  font-family: ${({ theme }) => theme.fontFamily.regular};
-  color: ${({ theme }) => theme.colors.textSecondary};
-`;
-
-const BadgeRow = styled.View`
-  margin-top: -5px;
-  flex-direction: row;
-`;
-
-const Badge = styled.View<{ bg: string }>`
-  background-color: ${({ bg }) => bg};
-  padding: 0px 8px;
-  border-radius: 6px;
-  flex-direction: row;
-  align-items: center;
-  gap: 4px;
-`;
-
 const BadgeText = styled(AppText)<{ color: string }>`
   font-size: 10px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
@@ -819,41 +761,6 @@ const BottomSpace = styled.View`
   height: 40px;
 `;
 
-// const BottomAdContainer = styled.View`
-//   height: 60px;
-//   width: 100%;
-//   align-items: center;
-//   justify-content: center;
-//   background-color: #f8fafc;
-//   border-top-width: 1px;
-//   border-top-color: #e2e8f0;
-// `;
-
-const TagScrollView = styled.ScrollView`
-  margin-top: 10px;
-  margin-bottom: 6px;
-`;
-
-// isLast 프로퍼티 추가
-const TagButton = styled.TouchableOpacity<{
-  selected: boolean;
-  isLast?: boolean;
-}>`
-  padding: 7px 13px;
-  /* 마지막 태그일 때는 margin-right를 0으로 설정 */
-  margin-right: ${({ isLast }) => (isLast ? -7 : 7)}px;
-
-  border-radius: 18px;
-
-  background-color: ${({ selected, theme }) =>
-    selected ? theme.colors.primary : theme.colors.card};
-
-  border-width: 1px;
-
-  border-color: ${({ selected, theme }) =>
-    selected ? theme.colors.primary : theme.colors.border};
-`;
-
 const TagText = styled(AppText)<{ selected: boolean }>`
   font-size: 11px;
 
@@ -862,28 +769,6 @@ const TagText = styled(AppText)<{ selected: boolean }>`
   color: ${({ selected, theme }) =>
     selected ? "#FFFFFF" : theme.colors.textSecondary};
 `;
-// const TopButton = styled.TouchableOpacity`
-//   position: absolute;
-
-//   right: 20px;
-//   bottom: 75px;
-
-//   width: 44px;
-//   height: 44px;
-
-//   border-radius: 22px;
-
-//   background-color: ${({ theme }) => theme.colors.primary};
-
-//   align-items: center;
-//   justify-content: center;
-
-//   elevation: 5;
-//   shadow-color: #000;
-//   shadow-opacity: 0.15;
-//   shadow-radius: 6px;
-//   shadow-offset: 0px 3px;
-// `;
 
 const BottomAdContainer = styled.View<{ bottomInset: number }>`
   width: 100%;
@@ -913,13 +798,6 @@ const TopButton = styled.TouchableOpacity<{ bottomInset: number }>`
   shadow-offset: 0px 3px;
 `;
 
-const TagHeaderRow = styled.View`
-  margin-top: -10px;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-end;
-`;
-
 const TagSectionTitle = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.tiny}px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
@@ -930,4 +808,66 @@ const ScrollHintText = styled(AppText)`
   font-size: ${({ theme }) => theme.typography.tiny}px;
   font-family: ${({ theme }) => theme.fontFamily.medium};
   color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const Badge = styled.View<{ bg: string }>`
+  background-color: ${({ bg }) => bg};
+  padding: 2px 8px;
+  border-radius: 6px;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+`;
+
+const TagScrollView = styled.ScrollView`
+  margin-top: 10px;
+  margin-bottom: 4px;
+`;
+
+const TagButton = styled.TouchableOpacity<{
+  selected: boolean;
+  isLast?: boolean;
+}>`
+  padding: 7px 13px;
+  margin-right: ${({ isLast }) => (isLast ? 0 : 7)}px;
+  border-radius: 18px;
+  background-color: ${({ selected, theme }) =>
+    selected ? theme.colors.primary : theme.colors.card};
+  border-width: 1px;
+  border-color: ${({ selected, theme }) =>
+    selected ? theme.colors.primary : theme.colors.border};
+`;
+
+const TagHeaderRow = styled.View`
+  margin-top: 2px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+`;
+
+const TitleRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+`;
+
+const ItemName = styled(AppText)<{ checked: boolean }>`
+  font-size: ${({ theme }) => theme.typography.body}px;
+  line-height: ${({ theme }) => Math.round(theme.typography.body * 1.2)}px;
+  font-family: ${({ theme }) => theme.fontFamily.bold};
+  color: ${({ theme, checked }) =>
+    checked ? theme.colors.textSecondary : theme.colors.text};
+  text-decoration-line: ${({ checked }) => (checked ? "line-through" : "none")};
+`;
+
+const QuantityText = styled(AppText)`
+  font-size: ${({ theme }) => theme.typography.small}px;
+  line-height: ${({ theme }) => Math.round(theme.typography.small * 1.2)}px;
+  font-family: ${({ theme }) => theme.fontFamily.regular};
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const BadgeRow = styled.View`
+  margin-top: 10px;
+  flex-direction: row;
 `;

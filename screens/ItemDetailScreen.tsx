@@ -347,36 +347,6 @@ const DecisionCard = styled.View<{ bg: string }>`
   margin-top: 4px;
 `;
 
-/* 💡 GlossyDot과 텍스트를 수직 정렬하고 간격을 벌려주는 DecisionBadge */
-const DecisionBadge = styled.View`
-  flex-direction: row;
-  align-items: center;
-  align-self: flex-start;
-  gap: 6px;
-  margin-bottom: -8px;
-`;
-
-const DecisionBadgeText = styled(AppText)<{ color: string }>`
-  font-size: 12px;
-  font-family: ${({ theme }) => theme.fontFamily.bold};
-  color: ${({ color }) => color};
-  include-font-padding: false;
-`;
-
-const DecisionTitle = styled(AppText)`
-  font-size: ${({ theme }) => theme.typography.subheading}px;
-  font-family: ${({ theme }) => theme.fontFamily.bold};
-  color: #1e293b;
-  margin-bottom: -4px;
-`;
-
-const DecisionDesc = styled(AppText)`
-  font-size: ${({ theme }) => theme.typography.small}px;
-  font-family: ${({ theme }) => theme.fontFamily.medium};
-  color: #475569;
-  line-height: 18px;
-`;
-
 const Section = styled.View`
   margin-top: 20px;
 `;
@@ -522,4 +492,36 @@ const SecondBabyBadgeText = styled(AppText)`
   font-size: 11px;
   font-family: ${({ theme }) => theme.fontFamily.bold};
   color: #ffffff;
+`;
+
+const DecisionBadge = styled.View`
+  flex-direction: row;
+  align-items: center;
+  align-self: flex-start;
+  gap: 6px;
+  margin-bottom: 6px;
+`;
+
+const DecisionBadgeText = styled(AppText)<{ color: string }>`
+  font-size: 12px;
+  line-height: 16px;
+  font-family: ${({ theme }) => theme.fontFamily.bold};
+  color: ${({ color }) => color};
+  include-font-padding: false;
+`;
+
+const DecisionTitle = styled(AppText)`
+  font-size: ${({ theme }) => theme.typography.subheading}px;
+  line-height: ${({ theme }) =>
+    Math.round(theme.typography.subheading * 1.25)}px;
+  font-family: ${({ theme }) => theme.fontFamily.bold};
+  color: #1e293b;
+  margin-bottom: 4px;
+`;
+
+const DecisionDesc = styled(AppText)`
+  font-size: ${({ theme }) => theme.typography.small}px;
+  font-family: ${({ theme }) => theme.fontFamily.medium};
+  color: #475569;
+  line-height: 18px;
 `;

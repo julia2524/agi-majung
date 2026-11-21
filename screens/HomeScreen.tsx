@@ -924,21 +924,6 @@ const CategoryProgressFill = styled.View<{ progress: number }>`
   background-color: ${({ theme }) => theme.colors.primary};
 `;
 
-const MyListTitle = styled(AppText)`
-  font-size: 14px;
-  font-family: ${({ theme }) => theme.fontFamily.bold};
-  color: ${({ theme }) => theme.colors.text};
-  flex-shrink: 1;
-`;
-
-const MyListDesc = styled(AppText)`
-  font-size: 12px;
-  font-family: ${({ theme }) => theme.fontFamily.regular};
-  color: ${({ theme }) => theme.colors.textSecondary};
-  margin-top: -13px;
-  flex-shrink: 1;
-`;
-
 const MyListCard = styled.TouchableOpacity`
   flex-direction: row;
   align-items: center;
@@ -968,15 +953,6 @@ const BottomSpace = styled.View`
   height: 24px;
 `;
 
-// const BottomAdContainer = styled.View`
-//   height: 60px;
-//   width: 100%;
-//   align-items: center;
-//   justify-content: center;
-//   background-color: #f8fafc;
-//   border-top-width: 1px;
-//   border-top-color: #e2e8f0;
-// `;
 const BottomAdContainer = styled.View<{ bottomInset: number }>`
   width: 100%;
   min-height: ${({ bottomInset }) => 60 + bottomInset}px;
@@ -995,4 +971,21 @@ const CustomIconBadge = styled.View`
   background-color: ${({ theme }) => theme.colors.background};
   align-items: center;
   justify-content: center;
+`;
+
+const MyListTitle = styled(AppText)`
+  font-size: 14px;
+  line-height: 18px;
+  font-family: ${({ theme }) => theme.fontFamily.bold};
+  color: ${({ theme }) => theme.colors.text};
+  flex-shrink: 1;
+`;
+
+const MyListDesc = styled(AppText)`
+  font-size: 12px;
+  line-height: 16px;
+  font-family: ${({ theme }) => theme.fontFamily.regular};
+  color: ${({ theme }) => theme.colors.textSecondary};
+  margin-top: 2px;
+  flex-shrink: 1;
 `;

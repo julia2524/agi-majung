@@ -303,19 +303,6 @@ const TextContainer = styled.View`
   margin-left: 12px;
 `;
 
-const MenuTitle = styled(AppText)`
-  font-size: ${({ theme }) => theme.typography.button}px;
-  font-family: ${({ theme }) => theme.fontFamily.bold};
-  color: ${({ theme }) => theme.colors.text};
-`;
-
-const MenuDescription = styled(AppText)`
-  margin-top: -20px;
-  font-size: ${({ theme }) => theme.typography.small}px;
-  font-family: ${({ theme }) => theme.fontFamily.regular};
-  color: ${({ theme }) => theme.colors.textSecondary};
-`;
-
 const Arrow = styled.View`
   margin-left: 8px;
 `;
@@ -367,19 +354,6 @@ const DeleteIcon = styled.View`
   background-color: #fff1f1;
 `;
 
-const DeleteTitle = styled(AppText)`
-  font-size: ${({ theme }) => theme.typography.button}px;
-  font-family: ${({ theme }) => theme.fontFamily.bold};
-  color: #e57373;
-`;
-
-const DeleteDescription = styled(AppText)`
-  margin-top: -20px;
-  font-size: ${({ theme }) => theme.typography.small}px;
-  font-family: ${({ theme }) => theme.fontFamily.regular};
-  color: ${({ theme }) => theme.colors.textSecondary};
-`;
-
 const BottomSpace = styled.View`
   height: 40px;
 `;
@@ -393,4 +367,34 @@ export const SettingCard = styled.View`
   gap: 12px;
   elevation: 2;
   box-shadow: 0px 4px 12px rgba(124, 92, 255, 0.06);
+`;
+
+const MenuTitle = styled(AppText)`
+  font-size: ${({ theme }) => theme.typography.button}px;
+  line-height: ${({ theme }) => Math.round(theme.typography.button * 1.25)}px;
+  font-family: ${({ theme }) => theme.fontFamily.bold};
+  color: ${({ theme }) => theme.colors.text};
+`;
+
+const MenuDescription = styled(AppText)`
+  margin-top: 5px;
+  font-size: ${({ theme }) => theme.typography.small}px;
+  line-height: ${({ theme }) => Math.round(theme.typography.small * 1.35)}px;
+  font-family: ${({ theme }) => theme.fontFamily.regular};
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const DeleteTitle = styled(AppText)`
+  font-size: ${({ theme }) => theme.typography.button}px;
+  line-height: ${({ theme }) => Math.round(theme.typography.button * 1.25)}px;
+  font-family: ${({ theme }) => theme.fontFamily.bold};
+  color: #e57373;
+`;
+
+const DeleteDescription = styled(AppText)`
+  margin-top: 5px;
+  font-size: ${({ theme }) => theme.typography.small}px;
+  line-height: ${({ theme }) => Math.round(theme.typography.small * 1.35)}px;
+  font-family: ${({ theme }) => theme.fontFamily.regular};
+  color: ${({ theme }) => theme.colors.textSecondary};
 `;
