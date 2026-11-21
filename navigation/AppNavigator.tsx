@@ -12,6 +12,8 @@ import ChecklistScreen from "../screens/ChecklistScreen";
 
 import { RootStackParamList } from "./types";
 import { getBabyProfile } from "../storage/storage";
+import CustomCategoryScreen from "../screens/CustomCategoryScreen";
+import CustomItemScreen from "../screens/CustomItemScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 interface AppNavigatorProps {
@@ -133,6 +135,12 @@ export default function AppNavigator({ onReady }: AppNavigatorProps) {
           animation: "fade",
         }}
       />
+      <Stack.Screen
+        name="CustomCategoryScreen"
+        component={CustomCategoryScreen}
+      />
+
+      <Stack.Screen name="CustomItemScreen" component={CustomItemScreen} />
     </Stack.Navigator>
   );
 }

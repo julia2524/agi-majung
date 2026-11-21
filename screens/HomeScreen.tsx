@@ -17,7 +17,13 @@ import {
   ToyBookIcon,
   FeedingIcon,
 } from "../components/icons/CategoryIcons";
-import { getCheckedItems, getMyItems, MyItem } from "../storage/storage";
+import {
+  CustomCategory,
+  getCheckedItems,
+  getMyCategories,
+  getMyItems,
+  MyItem,
+} from "../storage/storage";
 import { babyItems } from "../data/babyItems";
 import BannerAd from "../services/BannerAd";
 import { calculateUrgency, getItemTimingStatus } from "../utils/itemTiming";
@@ -67,6 +73,8 @@ export default function HomeScreen({ navigation, route }: Props) {
   const theme = useTheme();
   const { dueDate, babyOrder } = route.params;
   const [myItems, setMyItems] = useState<MyItem[]>([]);
+  const [myCategories, setMyCategories] = useState<CustomCategory[]>([]);
+
   useFocusEffect(
     React.useCallback(() => {
       const loadMyItems = async () => {
@@ -77,16 +85,40 @@ export default function HomeScreen({ navigation, route }: Props) {
       loadMyItems();
     }, []),
   );
-  const myItemProgress = useMemo(() => {
-    const total = myItems.length;
-    const checked = myItems.filter((item) => item.isChecked).length;
+  // const myItemProgress = useMemo(() => {
+  //   const total = myItems.length;
+  //   const checked = myItems.filter((item) => item.isChecked).length;
 
-    return {
-      total,
-      checked,
-      percent: total === 0 ? 0 : Math.round((checked / total) * 100),
-    };
-  }, [myItems]);
+  //   return {
+  //     total,
+  //     checked,
+  //     percent: total === 0 ? 0 : Math.round((checked / total) * 100),
+  //   };
+  // }, [myItems]);
+
+  const customCategoryProgressMap = useMemo(() => {
+    const result: Record<
+      string,
+      { total: number; checked: number; percent: number }
+    > = {};
+
+    myCategories.forEach((category) => {
+      const categoryItems = myItems.filter(
+        (item) => item.categoryId === category.id,
+      );
+
+      const total = categoryItems.length;
+      const checked = categoryItems.filter((item) => item.isChecked).length;
+
+      result[category.id] = {
+        total,
+        checked,
+        percent: total === 0 ? 0 : Math.round((checked / total) * 100),
+      };
+    });
+
+    return result;
+  }, [myCategories, myItems]);
 
   const [checkedMap, setCheckedMap] = useState<
     Record<string, (string | number)[]>
@@ -192,15 +224,23 @@ export default function HomeScreen({ navigation, route }: Props) {
     useCallback(() => {
       let isActive = true;
 
-      const loadProgress = async () => {
-        const savedItems = await getCheckedItems();
-        if (isActive) {
-          // 복사본을 전달하여 React가 상태 변화를 확실히 감지하게 함
-          setCheckedMap({ ...savedItems });
+      const loadMyData = async () => {
+        try {
+          const [savedItems, savedCategories] = await Promise.all([
+            getMyItems(),
+            getMyCategories(),
+          ]);
+
+          if (isActive) {
+            setMyItems(savedItems);
+            setMyCategories(savedCategories);
+          }
+        } catch (error) {
+          console.error("사용자 준비물 데이터 불러오기 실패:", error);
         }
       };
 
-      loadProgress();
+      loadMyData();
 
       return () => {
         isActive = false;
@@ -386,8 +426,110 @@ export default function HomeScreen({ navigation, route }: Props) {
               </CategoryCard>
             );
           })}
+          {/* 사용자 카테고리 */}
+          {/* {myCategories.map((category) => {
+            const prog = customCategoryProgressMap[category.id] || {
+              total: 0,
+              checked: 0,
+              percent: 0,
+            };
 
-          <CategoryCard
+            const isAllDone = prog.total > 0 && prog.checked === prog.total;
+
+            return (
+              <CategoryCard
+                key={`custom-${category.id}`}
+                activeOpacity={0.7}
+                onPress={() =>
+                  navigation.navigate("CustomItemScreen", {
+                    categoryId: category.id,
+                  })
+                }
+              >
+                {isAllDone && (
+                  <DoneBadge>
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={16}
+                      color={theme.colors.primary}
+                    />
+                  </DoneBadge>
+                )}
+
+                <Ionicons
+                  name={category.icon as keyof typeof Ionicons.glyphMap}
+                  size={34}
+                  color={theme.colors.primary}
+                />
+
+                <CategoryName numberOfLines={1}>{category.name}</CategoryName>
+
+                <CategoryProgressWrapper>
+                  <CategoryProgressBar>
+                    <CategoryProgressFill progress={prog.percent} />
+                  </CategoryProgressBar>
+
+                  <CategoryCountText>
+                    {prog.checked}/{prog.total}
+                  </CategoryCountText>
+                </CategoryProgressWrapper>
+              </CategoryCard>
+            );
+          })} */}
+
+          {/* 사용자 카테고리 */}
+          {myCategories.map((category) => {
+            const prog = customCategoryProgressMap[category.id] || {
+              total: 0,
+              checked: 0,
+              percent: 0,
+            };
+
+            const isAllDone = prog.total > 0 && prog.checked === prog.total;
+
+            return (
+              <CategoryCard
+                key={`custom-${category.id}`}
+                activeOpacity={0.7}
+                onPress={() =>
+                  navigation.navigate("CustomItemScreen", {
+                    categoryId: category.id,
+                  })
+                }
+              >
+                {isAllDone && (
+                  <DoneBadge>
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={16}
+                      color={theme.colors.primary}
+                    />
+                  </DoneBadge>
+                )}
+
+                <CustomIconBadge>
+                  <Ionicons
+                    name={category.icon as keyof typeof Ionicons.glyphMap}
+                    size={18}
+                    color={theme.colors.primary}
+                  />
+                </CustomIconBadge>
+
+                <CategoryName numberOfLines={1}>{category.name}</CategoryName>
+
+                <CategoryProgressWrapper>
+                  <CategoryProgressBar>
+                    <CategoryProgressFill progress={prog.percent} />
+                  </CategoryProgressBar>
+
+                  <CategoryCountText>
+                    {prog.checked}/{prog.total}
+                  </CategoryCountText>
+                </CategoryProgressWrapper>
+              </CategoryCard>
+            );
+          })}
+          {/* <CategoryCard
             activeOpacity={0.7}
             onPress={() => navigation.navigate("MyItemScreen")}
           >
@@ -415,10 +557,10 @@ export default function HomeScreen({ navigation, route }: Props) {
                 {myItemProgress.checked}/{myItemProgress.total}
               </CategoryCountText>
             </CategoryProgressWrapper>
-          </CategoryCard>
+          </CategoryCard> */}
         </CategoryGrid>
         {/* ========== 5. 나만의 준비물 ========== */}
-        <MyListCard
+        {/* <MyListCard
           activeOpacity={0.7}
           onPress={() => navigation.navigate("MyItemScreen")}
         >
@@ -430,16 +572,40 @@ export default function HomeScreen({ navigation, route }: Props) {
             />
           </MyListIcon>
           <MyListContent>
-            <MyListTitle>나만의 준비물 추가하기</MyListTitle>
-            <MyListDesc>목록에 없는 물건을 직접 등록해요</MyListDesc>
+            <MyListTitle>나만의 카테고리 추가하기</MyListTitle>
+            <MyListDesc>목록에 없는 카테고리를 직접 등록해요</MyListDesc>
           </MyListContent>
           <Ionicons
             name="chevron-forward"
             size={18}
             color={theme.colors.textSecondary}
           />
-        </MyListCard>
+        </MyListCard> */}
+        <MyListCard
+          activeOpacity={0.7}
+          onPress={() => navigation.navigate("CustomCategoryScreen")}
+        >
+          <MyListIcon>
+            <Ionicons
+              name="add-circle-outline"
+              size={22}
+              color={theme.colors.primary}
+            />
+          </MyListIcon>
 
+          <MyListContent>
+            <MyListTitle>나만의 카테고리 추가하기</MyListTitle>
+            <MyListDesc>
+              우리 아기에게 필요한 카테고리를 직접 만들어요
+            </MyListDesc>
+          </MyListContent>
+
+          <Ionicons
+            name="chevron-forward"
+            size={18}
+            color={theme.colors.textSecondary}
+          />
+        </MyListCard>
         <BottomSpace />
       </ScrollContent>
 
@@ -820,4 +986,13 @@ const BottomAdContainer = styled.View<{ bottomInset: number }>`
   background-color: #f8fafc;
   border-top-width: 1px;
   border-top-color: #e2e8f0;
+`;
+
+const CustomIconBadge = styled.View`
+  width: 34px;
+  height: 34px;
+  border-radius: 17px;
+  background-color: ${({ theme }) => theme.colors.background};
+  align-items: center;
+  justify-content: center;
 `;

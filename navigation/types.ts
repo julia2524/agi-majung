@@ -25,4 +25,8 @@ export type RootStackParamList = {
   };
   MyItemScreen: undefined;
   SettingScreen: undefined;
+  CustomCategoryScreen: undefined;
+  CustomItemScreen: {
+    categoryId: string;
+  };
 };
