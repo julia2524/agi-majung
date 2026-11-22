@@ -26,7 +26,7 @@ import {
   CustomCategory,
 } from "../storage/storage";
 import BannerAd from "../services/BannerAd";
-import { AppText } from "../utils/AppText";
+import { AppText, AppTextInput } from "../utils/AppText";
 import CustomAlert from "../components/CustomAlert";
 
 type Props = NativeStackScreenProps<RootStackParamList, "CustomCategoryScreen">;
@@ -38,6 +38,10 @@ type CategoryWithProgress = CustomCategory & {
   checked: number;
 };
 
+type AlertState = {
+  title: string;
+  message?: string;
+} | null;
 const CATEGORY_ICONS = [
   "heart-outline",
   "shirt-outline",
@@ -87,35 +91,10 @@ export default function CustomCategoryScreen({ navigation }: Props) {
 
   const [categoryToDelete, setCategoryToDelete] =
     useState<CustomCategory | null>(null);
+
+  const [alertConfig, setAlertConfig] = useState<AlertState>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // 카테고리와 각 카테고리의 준비물 진행률 불러오기
-  //   const loadCategories = useCallback(async () => {
-  //     try {
-  //       setLoading(true);
-
-  //       const savedCategories = await getMyCategories();
-
-  //       const categoriesWithProgress = await Promise.all(
-  //         savedCategories.map(async (category) => {
-  //           const items = await getMyItemsByCategory(category.id);
-
-  //           return {
-  //             ...category,
-  //             total: items.length,
-  //             checked: items.filter((item) => item.isChecked).length,
-  //           };
-  //         }),
-  //       );
-
-  //       setCategories(categoriesWithProgress);
-  //     } catch (error) {
-  //       console.error("카테고리 불러오기 실패:", error);
-  //       Alert.alert("오류", "카테고리를 불러오지 못했어요.");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   }, []);
   const loadCategories = useCallback(async () => {
     try {
       setLoading(true);
@@ -172,12 +151,13 @@ export default function CustomCategoryScreen({ navigation }: Props) {
     setModalVisible(true);
   };
 
-  // 카테고리 저장
   const handleSaveCategory = async () => {
     const trimmedName = categoryName.trim();
 
     if (!trimmedName) {
-      Alert.alert("카테고리 이름을 입력해 줘!");
+      setAlertConfig({
+        title: "카테고리 이름을 입력해 주세요.",
+      });
       return;
     }
 
@@ -188,7 +168,10 @@ export default function CustomCategoryScreen({ navigation }: Props) {
     );
 
     if (duplicated) {
-      Alert.alert("이미 같은 이름의 카테고리가 있어요.");
+      setAlertConfig({
+        title: "이미 같은 이름의 카테고리가 있어요.",
+        message: "다른 이름으로 입력해 주세요.",
+      });
       return;
     }
 
@@ -226,7 +209,10 @@ export default function CustomCategoryScreen({ navigation }: Props) {
       await loadCategories();
     } catch (error) {
       console.error("카테고리 저장 실패:", error);
-      Alert.alert("오류", "카테고리를 저장하지 못했어요.");
+      setAlertConfig({
+        title: "오류",
+        message: "카테고리를 저장하지 못했어요.",
+      });
     } finally {
       setSaving(false);
     }
@@ -252,33 +238,6 @@ export default function CustomCategoryScreen({ navigation }: Props) {
       setDeleting(false);
     }
   };
-
-  // 카테고리 삭제
-  //   const handleDeleteCategory = (category: CustomCategory) => {
-  //     Alert.alert(
-  //       "카테고리를 삭제할까요?",
-  //       `"${category.name}" 카테고리와 안에 들어 있는 준비물이 모두 삭제돼요.`,
-  //       [
-  //         {
-  //           text: "취소",
-  //           style: "cancel",
-  //         },
-  //         {
-  //           text: "삭제",
-  //           style: "destructive",
-  //           onPress: async () => {
-  //             try {
-  //               await deleteMyCategory(category.id);
-  //               await loadCategories();
-  //             } catch (error) {
-  //               console.error("카테고리 삭제 실패:", error);
-  //               Alert.alert("오류", "카테고리를 삭제하지 못했어요.");
-  //             }
-  //           },
-  //         },
-  //       ],
-  //     );
-  //   };
 
   const handleScrollToTop = () => {
     scrollRef.current?.scrollTo({
@@ -562,6 +521,16 @@ export default function CustomCategoryScreen({ navigation }: Props) {
         }}
         onConfirm={handleConfirmDeleteCategory}
       />
+      {/* 이름 미입력 / 중복 / 오류 안내 CustomAlert */}
+      <CustomAlert
+        visible={Boolean(alertConfig)}
+        title={alertConfig?.title ?? ""}
+        message={alertConfig?.message ?? ""}
+        showCancel={false}
+        confirmText="확인"
+        onClose={() => setAlertConfig(null)}
+        onConfirm={() => setAlertConfig(null)}
+      />
     </Container>
   );
 }
@@ -771,7 +740,7 @@ const InputLabel = styled(AppText)`
   margin-bottom: 10px;
 `;
 
-const NameInput = styled.TextInput`
+const NameInput = styled(AppTextInput)`
   height: 48px;
   border-radius: 12px;
   background-color: ${({ theme }) => theme.colors.background};

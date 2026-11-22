@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { ExpoConfig, ConfigContext } from "expo/config";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
@@ -31,6 +32,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     favicon: "./assets/favicon.png",
   },
   plugins: [
+    "./plugins/withOptionalPortraitFeature",
     "expo-localization",
     "expo-font",
     "@react-native-community/datetimepicker",
