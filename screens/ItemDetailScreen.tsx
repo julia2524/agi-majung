@@ -2,7 +2,10 @@ import React from "react";
 import styled, { useTheme } from "styled-components/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 import BabyHeader from "../components/BabyHeader";
 import { RootStackParamList } from "../navigation/types";
@@ -11,6 +14,7 @@ import { getItemIcon, getPriorityText } from "../utils/utils";
 import { getPreparationPeriodText } from "../utils/itemTiming";
 import { GlossyDot } from "../components/GlossyDot/GlossyDot";
 import { AppText } from "../utils/AppText";
+import BannerAd from "../services/BannerAd";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ItemDetailScreen">;
 
@@ -65,6 +69,7 @@ const getDecisionGuide = (decision?: string) => {
   }
 };
 export default function ItemDetailScreen({ route }: Props) {
+  const insets = useSafeAreaInsets();
   const { itemId, babyOrder } = route.params;
   const theme = useTheme();
 
@@ -263,6 +268,10 @@ export default function ItemDetailScreen({ route }: Props) {
         )}
         <BottomSpace />
       </ScrollContent>
+      {/* 하단 광고 */}
+      <BottomAdContainer bottomInset={insets.bottom}>
+        <BannerAd />
+      </BottomAdContainer>
     </Container>
   );
 }
@@ -270,6 +279,16 @@ export default function ItemDetailScreen({ route }: Props) {
 /* -----------------------------
    Styled Components
 ----------------------------- */
+const BottomAdContainer = styled.View<{ bottomInset: number }>`
+  width: 100%;
+  min-height: ${({ bottomInset }) => 60 + bottomInset}px;
+  padding-bottom: ${({ bottomInset }) => bottomInset}px;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+  border-top-width: 1px;
+  border-top-color: #e2e8f0;
+`;
 
 const Container = styled(SafeAreaView)`
   flex: 1;

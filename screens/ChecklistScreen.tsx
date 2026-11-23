@@ -622,28 +622,6 @@ const FilterTabText = styled(AppText)<{ active: boolean }>`
     active ? "#FFFFFF" : theme.colors.textSecondary};
 `;
 
-// const FilterTab = styled.TouchableOpacity<{ active: boolean }>`
-//   flex: 1;
-//   padding-vertical: 8px;
-//   border-radius: 20px;
-//   align-items: center;
-//   justify-content: center;
-//   gap: 4px;
-//   flex-direction: row;
-//   background-color: ${({ active, theme }) =>
-//     active ? theme.colors.primary : theme.colors.card};
-//   border-width: 1px;
-//   border-color: ${({ active, theme }) =>
-//     active ? theme.colors.primary : theme.colors.border};
-// `;
-
-// const FilterTabText = styled(AppText)<{ active: boolean }>`
-//   font-size: 11px;
-//   font-family: ${({ theme }) => theme.fontFamily.bold};
-//   color: ${({ active, theme }) =>
-//     active ? "#FFFFFF" : theme.colors.textSecondary};
-// `;
-
 const ItemList = styled.View`
   margin-top: 16px;
   gap: 10px;

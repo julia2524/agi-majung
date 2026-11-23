@@ -225,7 +225,7 @@ export default function SettingScreen({ navigation }: Props) {
         {/* -----------------------------
             앱 정보
         ----------------------------- */}
-        <Section>
+        {/* <Section>
           <SectionTitle>앱 정보</SectionTitle>
 
           <InfoCard>
@@ -234,7 +234,7 @@ export default function SettingScreen({ navigation }: Props) {
               <InfoValue>1.0.0</InfoValue>
             </InfoRow>
           </InfoCard>
-        </Section>
+        </Section> */}
 
         <BottomSpace />
       </ScrollContent>

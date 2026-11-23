@@ -41,3 +41,9 @@ yarn-error.*
 /android
 
 .env
+
+# Android / Expo build artifacts
+*.aab
+*.apk
+android/app/build/
+android/build/
